@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+*-backups/
+*.kicad_prl
+fp-info-cache
+.metadata/
+Debug/
+Release/
