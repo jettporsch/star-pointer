@@ -51,6 +51,10 @@
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
+
+void step_motor(GPIO_TypeDef *step_port, uint16_t step_pin, int steps);
+
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -101,30 +105,21 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 
-	/* One revolution forward */
-	  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
-	  for (int i = 0; i < 200; i++)
-	  {
-	    HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_SET);
-	    HAL_Delay(2);
-	    HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_RESET);
-	    HAL_Delay(3);
-	  }
+	  /* Motor 1: one rev forward, one rev back */
+	  HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);
+	  step_motor(STEP1_GPIO_Port, STEP1_Pin, 200);
+	  HAL_Delay(500);
+	  HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_RESET);
+	  step_motor(STEP1_GPIO_Port, STEP1_Pin, 200);
 	  HAL_Delay(1000);
 
-	  /* One revolution back */
-	  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
-	  for (int i = 0; i < 200; i++)
-	  {
-	    HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_SET);
-	    HAL_Delay(2);
-	    HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_RESET);
-	    HAL_Delay(3);
-	  }
+	  /* Motor 2: one rev forward, one rev back */
+	  HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_SET);
+	  step_motor(STEP2_GPIO_Port, STEP2_Pin, 200);
+	  HAL_Delay(500);
+	  HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_RESET);
+	  step_motor(STEP2_GPIO_Port, STEP2_Pin, 200);
 	  HAL_Delay(1000);
-
-
-
   }
   /* USER CODE END 3 */
 }
@@ -176,6 +171,19 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+
+void step_motor(GPIO_TypeDef *step_port, uint16_t step_pin, int steps)
+{
+  for (int i = 0; i < steps; i++)
+  {
+    HAL_GPIO_WritePin(step_port, step_pin, GPIO_PIN_SET);
+    HAL_Delay(2);
+    HAL_GPIO_WritePin(step_port, step_pin, GPIO_PIN_RESET);
+    HAL_Delay(3);
+  }
+}
+
 
 /* USER CODE END 4 */
 
