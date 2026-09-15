@@ -25,3 +25,11 @@ I moved the step loop into a step_motor() function.
 Driver 1's heatsink got hot after running motor 1 for around a minute, so I left motor 1 unplugged while setting driver 2.
 
 I tested both motors one revolution forward and back, and it worked.
+
+## 2026-09-15: Serial link test
+
+Serial runs over USART2 through the ST-Link USB at 115200 baud. I read it with screen on the Mac.
+
+First I tested sending hello every second. Then I used keys 1 to 4 to move each motor forward or backward one revolution. The Nucleo replies with what it did.
+
+I added a uart_print() helper.

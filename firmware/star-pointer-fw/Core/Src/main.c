@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,6 +53,7 @@ void SystemClock_Config(void);
 
 
 void step_motor(GPIO_TypeDef *step_port, uint16_t step_pin, int steps);
+void uart_print(const char *s);
 
 
 /* USER CODE END PFP */
@@ -94,6 +95,10 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+
+  uart_print("star pointer ready. keys: 1/2 motor1, 3/4 motor2\r\n");
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -105,22 +110,36 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 
-	  /* Motor 1: one rev forward, one rev back */
-	  HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);
-	  step_motor(STEP1_GPIO_Port, STEP1_Pin, 200);
-	  HAL_Delay(500);
-	  HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_RESET);
-	  step_motor(STEP1_GPIO_Port, STEP1_Pin, 200);
-	  HAL_Delay(1000);
+	    uint8_t rx;
+	    if (HAL_UART_Receive(&huart2, &rx, 1, 10) == HAL_OK)
+	    {
+	      if (rx == '1')
+	      {
+	        HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);
+	        step_motor(STEP1_GPIO_Port, STEP1_Pin, 200);
+	        uart_print("motor 1 forward\r\n");
+	      }
+	      else if (rx == '2')
+	      {
+	        HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_RESET);
+	        step_motor(STEP1_GPIO_Port, STEP1_Pin, 200);
+	        uart_print("motor 1 back\r\n");
+	      }
+	      else if (rx == '3')
+	      {
+	        HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_SET);
+	        step_motor(STEP2_GPIO_Port, STEP2_Pin, 200);
+	        uart_print("motor 2 forward\r\n");
+	      }
+	      else if (rx == '4')
+	      {
+	        HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_RESET);
+	        step_motor(STEP2_GPIO_Port, STEP2_Pin, 200);
+	        uart_print("motor 2 back\r\n");
+	      }
+	    }
+	  }
 
-	  /* Motor 2: one rev forward, one rev back */
-	  HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_SET);
-	  step_motor(STEP2_GPIO_Port, STEP2_Pin, 200);
-	  HAL_Delay(500);
-	  HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_RESET);
-	  step_motor(STEP2_GPIO_Port, STEP2_Pin, 200);
-	  HAL_Delay(1000);
-  }
   /* USER CODE END 3 */
 }
 
@@ -171,8 +190,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-
 void step_motor(GPIO_TypeDef *step_port, uint16_t step_pin, int steps)
 {
   for (int i = 0; i < steps; i++)
@@ -184,7 +201,10 @@ void step_motor(GPIO_TypeDef *step_port, uint16_t step_pin, int steps)
   }
 }
 
-
+void uart_print(const char *s)
+{
+  HAL_UART_Transmit(&huart2, (uint8_t *)s, strlen(s), HAL_MAX_DELAY);
+}
 /* USER CODE END 4 */
 
 /**
