@@ -99,8 +99,32 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  HAL_Delay(100);
+
+
+	/* One revolution forward */
+	  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
+	  for (int i = 0; i < 200; i++)
+	  {
+	    HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_SET);
+	    HAL_Delay(2);
+	    HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_RESET);
+	    HAL_Delay(3);
+	  }
+	  HAL_Delay(1000);
+
+	  /* One revolution back */
+	  HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
+	  for (int i = 0; i < 200; i++)
+	  {
+	    HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_SET);
+	    HAL_Delay(2);
+	    HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_RESET);
+	    HAL_Delay(3);
+	  }
+	  HAL_Delay(1000);
+
+
+
   }
   /* USER CODE END 3 */
 }
