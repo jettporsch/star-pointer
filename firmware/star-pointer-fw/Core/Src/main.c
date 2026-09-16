@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -28,6 +29,17 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+
+typedef struct {
+  TIM_HandleTypeDef *htim;
+  uint32_t channel;
+  GPIO_TypeDef *dir_port;
+  uint16_t dir_pin;
+  volatile uint32_t steps_left;
+  volatile uint8_t busy;
+} Axis;
+
 
 /* USER CODE END PTD */
 
@@ -45,6 +57,10 @@
 
 /* USER CODE BEGIN PV */
 
+
+Axis axes[2];
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -52,7 +68,8 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
 
-void step_motor(GPIO_TypeDef *step_port, uint16_t step_pin, int steps);
+void uart_print(const char *s);
+void axis_move(Axis *ax, int32_t steps);
 void uart_print(const char *s);
 
 
@@ -93,9 +110,13 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
 
+  axes[0] = (Axis){ &htim3, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0, 0 };
+  axes[1] = (Axis){ &htim2, TIM_CHANNEL_3, DIR2_GPIO_Port, DIR2_Pin, 0, 0 };
   uart_print("star pointer ready. keys: 1/2 motor1, 3/4 motor2\r\n");
 
 
@@ -113,32 +134,13 @@ int main(void)
 	    uint8_t rx;
 	    if (HAL_UART_Receive(&huart2, &rx, 1, 10) == HAL_OK)
 	    {
-	      if (rx == '1')
-	      {
-	        HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);
-	        step_motor(STEP1_GPIO_Port, STEP1_Pin, 200);
-	        uart_print("motor 1 forward\r\n");
-	      }
-	      else if (rx == '2')
-	      {
-	        HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_RESET);
-	        step_motor(STEP1_GPIO_Port, STEP1_Pin, 200);
-	        uart_print("motor 1 back\r\n");
-	      }
-	      else if (rx == '3')
-	      {
-	        HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_SET);
-	        step_motor(STEP2_GPIO_Port, STEP2_Pin, 200);
-	        uart_print("motor 2 forward\r\n");
-	      }
-	      else if (rx == '4')
-	      {
-	        HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_RESET);
-	        step_motor(STEP2_GPIO_Port, STEP2_Pin, 200);
-	        uart_print("motor 2 back\r\n");
-	      }
+	      if (rx == '1')      axis_move(&axes[0], 200);
+	      else if (rx == '2') axis_move(&axes[0], -200);
+	      else if (rx == '3') axis_move(&axes[1], 200);
+	      else if (rx == '4') axis_move(&axes[1], -200);
 	    }
 	  }
+
 
   /* USER CODE END 3 */
 }
@@ -190,21 +192,54 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void step_motor(GPIO_TypeDef *step_port, uint16_t step_pin, int steps)
-{
-  for (int i = 0; i < steps; i++)
-  {
-    HAL_GPIO_WritePin(step_port, step_pin, GPIO_PIN_SET);
-    HAL_Delay(2);
-    HAL_GPIO_WritePin(step_port, step_pin, GPIO_PIN_RESET);
-    HAL_Delay(3);
-  }
-}
+
 
 void uart_print(const char *s)
 {
   HAL_UART_Transmit(&huart2, (uint8_t *)s, strlen(s), HAL_MAX_DELAY);
 }
+
+void axis_move(Axis *ax, int32_t steps)
+{
+  if (ax->busy)
+  {
+    uart_print("busy\r\n");
+    return;
+  }
+  if (steps == 0) return;
+
+  HAL_GPIO_WritePin(ax->dir_port, ax->dir_pin,
+                    steps > 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  ax->steps_left = (steps > 0) ? steps : -steps;
+  ax->busy = 1;
+
+  HAL_Delay(1);  /* give DIR time to settle before the first step */
+
+  __HAL_TIM_SET_COUNTER(ax->htim, 0);
+  __HAL_TIM_CLEAR_IT(ax->htim, TIM_IT_CC1 | TIM_IT_CC2 | TIM_IT_CC3 | TIM_IT_CC4);
+  HAL_TIM_PWM_Start_IT(ax->htim, ax->channel);
+  uart_print("ok\r\n");
+}
+
+/* Runs automatically at the end of every step pulse */
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
+{
+  for (int i = 0; i < 2; i++)
+  {
+    Axis *ax = &axes[i];
+    if (htim == ax->htim && ax->busy)
+    {
+      if (ax->steps_left > 0) ax->steps_left--;
+      if (ax->steps_left == 0)
+      {
+        HAL_TIM_PWM_Stop_IT(ax->htim, ax->channel);
+        ax->busy = 0;
+      }
+    }
+  }
+}
+
+
 /* USER CODE END 4 */
 
 /**

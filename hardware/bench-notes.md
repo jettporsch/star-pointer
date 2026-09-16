@@ -33,3 +33,15 @@ Serial runs over USART2 through the ST-Link USB at 115200 baud. I read it with s
 First I tested sending hello every second. Then I used keys 1 to 4 to move each motor forward or backward one revolution. The Nucleo replies with what it did.
 
 I added a uart_print() helper.
+
+## 2026-09-15: Hardware timer step pulses
+
+I switched step pulses from bit-banging to hardware timers. TIM3 CH1 on PB4 drives motor 1 and TIM2 CH3 on PB10 drives motor 2.
+
+The timer clock is 84 MHz. Prescaler 83 gives 1 MHz, and period 4999 gives 5ms per step at 50% duty.
+
+An interrupt at the end of each pulse counts down the steps and stops the timer at zero. Each motor is an Axis struct.
+
+I tested both motors moving at once, and that worked. A second command mid-move replies with busy.
+
+CubeMX overwrote the STEP1/STEP2 labels when I assigned the timer channels.
