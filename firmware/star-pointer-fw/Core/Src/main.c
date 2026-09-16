@@ -25,11 +25,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 
 typedef struct {
   TIM_HandleTypeDef *htim;
@@ -38,8 +38,9 @@ typedef struct {
   uint16_t dir_pin;
   volatile uint32_t steps_left;
   volatile uint8_t busy;
+  volatile int32_t pos;
+  int8_t dir;
 } Axis;
-
 
 /* USER CODE END PTD */
 
@@ -59,6 +60,8 @@ typedef struct {
 
 
 Axis axes[2];
+char line_buf[64];
+uint8_t line_len = 0;
 
 
 /* USER CODE END PV */
@@ -67,11 +70,10 @@ Axis axes[2];
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
-
 void uart_print(const char *s);
-void axis_move(Axis *ax, int32_t steps);
-void uart_print(const char *s);
-
+int axis_move(Axis *ax, int32_t steps);
+void axis_stop_all(void);
+void handle_line(const char *line);
 
 /* USER CODE END PFP */
 
@@ -115,9 +117,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
-  axes[0] = (Axis){ &htim3, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0, 0 };
-  axes[1] = (Axis){ &htim2, TIM_CHANNEL_3, DIR2_GPIO_Port, DIR2_Pin, 0, 0 };
-  uart_print("star pointer ready. keys: 1/2 motor1, 3/4 motor2\r\n");
+  axes[0] = (Axis){ &htim3, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0, 0, 0, 1 };
+  axes[1] = (Axis){ &htim2, TIM_CHANNEL_3, DIR2_GPIO_Port, DIR2_Pin, 0, 0, 0, 1 };
+  uart_print("star pointer ready\r\n");
 
 
   /* USER CODE END 2 */
@@ -131,17 +133,27 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 
-	    uint8_t rx;
-	    if (HAL_UART_Receive(&huart2, &rx, 1, 10) == HAL_OK)
-	    {
-	      if (rx == '1')      axis_move(&axes[0], 200);
-	      else if (rx == '2') axis_move(&axes[0], -200);
-	      else if (rx == '3') axis_move(&axes[1], 200);
-	      else if (rx == '4') axis_move(&axes[1], -200);
+	  uint8_t c;
+	  if (HAL_UART_Receive(&huart2, &c, 1, 0) == HAL_OK) {
+	    if (c == '\r' || c == '\n') {
+	      if (line_len > 0) {
+	        uart_print("\r\n");
+	        line_buf[line_len] = '\0';
+	        handle_line(line_buf);
+	        line_len = 0;
+	      }
+	    } else if (c == 0x7F || c == 0x08) {
+	      if (line_len > 0) {
+	        line_len--;
+	        uart_print("\b \b");
+	      }
+	    } else if (line_len < sizeof(line_buf) - 1) {
+	      line_buf[line_len++] = c;
+	      HAL_UART_Transmit(&huart2, &c, 1, HAL_MAX_DELAY);
 	    }
 	  }
 
-
+  }
   /* USER CODE END 3 */
 }
 
@@ -193,21 +205,17 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-
 void uart_print(const char *s)
 {
   HAL_UART_Transmit(&huart2, (uint8_t *)s, strlen(s), HAL_MAX_DELAY);
 }
 
-void axis_move(Axis *ax, int32_t steps)
+int axis_move(Axis *ax, int32_t steps)
 {
-  if (ax->busy)
-  {
-    uart_print("busy\r\n");
-    return;
-  }
-  if (steps == 0) return;
+  if (ax->busy) return 1;
+  if (steps == 0) return 0;
 
+  ax->dir = (steps > 0) ? 1 : -1;
   HAL_GPIO_WritePin(ax->dir_port, ax->dir_pin,
                     steps > 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
   ax->steps_left = (steps > 0) ? steps : -steps;
@@ -218,7 +226,19 @@ void axis_move(Axis *ax, int32_t steps)
   __HAL_TIM_SET_COUNTER(ax->htim, 0);
   __HAL_TIM_CLEAR_IT(ax->htim, TIM_IT_CC1 | TIM_IT_CC2 | TIM_IT_CC3 | TIM_IT_CC4);
   HAL_TIM_PWM_Start_IT(ax->htim, ax->channel);
-  uart_print("ok\r\n");
+  return 0;
+}
+
+void axis_stop_all(void)
+{
+  for (int i = 0; i < 2; i++)
+  {
+    __disable_irq();
+    HAL_TIM_PWM_Stop_IT(axes[i].htim, axes[i].channel);
+    axes[i].steps_left = 0;
+    axes[i].busy = 0;
+    __enable_irq();
+  }
 }
 
 /* Runs automatically at the end of every step pulse */
@@ -230,6 +250,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
     if (htim == ax->htim && ax->busy)
     {
       if (ax->steps_left > 0) ax->steps_left--;
+      ax->pos += ax->dir;
       if (ax->steps_left == 0)
       {
         HAL_TIM_PWM_Stop_IT(ax->htim, ax->channel);
@@ -239,6 +260,35 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
   }
 }
 
+void handle_line(const char *line)
+{
+  int axis;
+  long steps;
+  char buf[64];
+
+  if (sscanf(line, "M %d %ld", &axis, &steps) == 2)
+  {
+    if (axis < 1 || axis > 2) { uart_print("ERR bad axis\r\n"); return; }
+    if (axis_move(&axes[axis - 1], steps)) { uart_print("ERR busy\r\n"); return; }
+    uart_print("OK\r\n");
+  }
+  else if (strcmp(line, "S") == 0)
+  {
+    snprintf(buf, sizeof(buf), "POS %ld %ld BUSY %d %d\r\n",
+             (long)axes[0].pos, (long)axes[1].pos,
+             axes[0].busy, axes[1].busy);
+    uart_print(buf);
+  }
+  else if (strcmp(line, "X") == 0)
+  {
+    axis_stop_all();
+    uart_print("OK\r\n");
+  }
+  else
+  {
+    uart_print("ERR unknown\r\n");
+  }
+}
 
 /* USER CODE END 4 */
 

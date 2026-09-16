@@ -45,3 +45,18 @@ An interrupt at the end of each pulse counts down the steps and stops the timer 
 I tested both motors moving at once, and that worked. A second command mid-move replies with busy.
 
 CubeMX overwrote the STEP1/STEP2 labels when I assigned the timer channels.
+
+## 2026-09-16: Serial command protocol
+
+The firmware now reads full lines over serial, with echo and backspace.
+
+Commands:
+- `M <axis> <steps>` moves axis 1 or 2 by a step count, negative for reverse
+- `S` reports position and busy for both axes
+- `X` stops both axes
+
+Replies are `OK`, `ERR <reason>`, or data.
+
+Position counts in the step interrupt, so it stays accurate after a stop.
+
+I tested `M` and `S` on both motors and they worked as intended. `X` stopped motor 1 mid-move and `S` reported the partial position. Bad axis and unknown commands both return errors.
