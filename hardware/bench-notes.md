@@ -68,3 +68,13 @@ I added `app/mount.py`, a Python class that talks to the Nucleo over serial. It 
 The first test failed because Python and the firmware got out of sync. The firmware's line buffer had leftover characters from an earlier screen session, so the first command came back as `ERR unknown`. I fixed it by sending a bare Enter on connect to clear the buffer, and by having `send` skip the echo and blank lines instead of expecting the echo first.
 
 After the fix I tested moves on both axes, `wait`, stopping mid-move, and a bad axis error. All worked. The DRV8825 heatsinks ran hot during testing.
+
+## 2026-09-16: 1/16 microstepping
+
+Both DRV8825s are now wired for 1/16 microstepping. Before this, M0 to M2 were floating, which is full step.
+
+Nucleo 3V3 moved to its own breadboard rail. That rail powers SLEEP on both drivers and M2 on each driver. M0 and M1 on each driver are tied to ground.
+
+At 1/16, 3200 steps is exactly one motor revolution. With the 4:1 belt reduction that works out to about 35.6 steps per degree at the output.
+
+I put a piece of tape on each motor shaft and confirmed 3200 steps gives one full revolution on both motors.
