@@ -60,3 +60,11 @@ Replies are `OK`, `ERR <reason>`, or data.
 Position counts in the step interrupt, so it stays accurate after a stop.
 
 I tested `M` and `S` on both motors and they worked as intended. `X` stopped motor 1 mid-move and `S` reported the partial position. Bad axis and unknown commands both return errors.
+
+## 2026-09-16: Python serial interface
+
+I added `app/mount.py`, a Python class that talks to the Nucleo over serial. It wraps the firmware commands as `move`, `status`, `stop`, and `wait`, and turns `ERR` replies into Python exceptions.
+
+The first test failed because Python and the firmware got out of sync. The firmware's line buffer had leftover characters from an earlier screen session, so the first command came back as `ERR unknown`. I fixed it by sending a bare Enter on connect to clear the buffer, and by having `send` skip the echo and blank lines instead of expecting the echo first.
+
+After the fix I tested moves on both axes, `wait`, stopping mid-move, and a bad axis error. All worked. The DRV8825 heatsinks ran hot during testing.
