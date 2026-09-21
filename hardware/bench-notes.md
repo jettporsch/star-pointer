@@ -92,3 +92,11 @@ The turntable spins freely with no rubbing. The inner ring screw heads are reach
 Printed the bearing housing and retainer and assembled with a 608-2RS. The bearing pressed into the 22.0 pocket by hand and seated on the shoulder. Retainer held with four M3 x 25 socket head screws, washers on both sides.
 
 The bearing spins freely with no extra drag after assembly. The printed shoulder only touches the outer ring, not the seal. This housing design goes into the fork.
+
+## 2026-09-21: Degree-based pointing
+
+Added `app/pointer.py`, which takes altitude and azimuth in degrees and moves both motors to match. It uses 35.56 steps per degree (200 steps x 16 microsteps x 4:1 belt / 360). Targets are calculated from home every time so rounding error does not build up.
+
+Azimuth stays between -180 and +180 from home and never crosses that point, so the cable loop cannot wind past its limit. Altitude is limited to 0 to 90. For now, wherever the motors are at connect counts as home. Endstop homing replaces that later.
+
+Tested with tape flags on both motor shafts. 90 degrees at the output is exactly one motor rev, which matched on both axes. Going from az 90 to az 180 went backwards to -180 as intended. Altitude 95 was refused.
