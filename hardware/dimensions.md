@@ -27,3 +27,14 @@ Measured hub face down.
 
 - 20T: 15.8 tall, teeth from 7.5 to 14.8
 - 80T: 18.14 tall, teeth from 8.75 to 16.24
+
+## Hardware measurements (calipers)
+
+- NEMA 17: 42.3 face, 31.0 bolt spacing, M3, 22 boss x 2 tall (standard). Body 37.5 long. Shaft 5mm with D-flat, 21.5 long
+- 608 bearing: 22 OD, 8 ID, 7 thick (standard)
+- Altitude shaft: 8mm rod, 300 long
+- 20T pulley: 5mm bore, ~15.9 flange OD
+- 80T pulley: 8mm bore, ~55.1 flange OD
+- Lazy susan: 120.13 OD, 70 center opening, 8.5 thick with pads removed
+- Endstop: 20 x 20 board, 3mm holes, 15 spacing
+- Laser: 12 dia x 38 long, 3 to 5V
