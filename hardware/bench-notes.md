@@ -100,3 +100,11 @@ Added `app/pointer.py`, which takes altitude and azimuth in degrees and moves bo
 Azimuth stays between -180 and +180 from home and never crosses that point, so the cable loop cannot wind past its limit. Altitude is limited to 0 to 90. For now, wherever the motors are at connect counts as home. Endstop homing replaces that later.
 
 Tested with tape flags on both motor shafts. 90 degrees at the output is exactly one motor rev, which matched on both axes. Going from az 90 to az 180 went backwards to -180 as intended. Altitude 95 was refused.
+
+## 2026-09-21: Pointing at stars by name
+
+Hooked `pointer.py` up to `skycoords.py`. `point_at("Vega")` now looks up the star, converts it to altitude and azimuth for Wylie at the current time, and moves both motors there. Stars below the horizon are refused.
+
+For now, home has to be level and facing true north for the pointing to be right. Endstop homing and calibration handle that once the mount is built.
+
+Tested with Vega, Arcturus, and Sirius. Vega's commanded and actual positions agreed within 0.012 degrees, which is under half a step, so the only error is rounding to whole steps. Sirius was below the horizon and was refused with no movement.

@@ -1,4 +1,7 @@
+from datetime import datetime, timezone
+
 from app.mount import Mount
+from app.skycoords import Observer, look_up
 
 # 200 steps/rev x 16 microsteps x 4:1 belt, per degree of output
 STEPS_PER_DEG = 200 * 16 * 4 / 360
@@ -10,12 +13,15 @@ ALT_SIGN, AZ_SIGN = 1, 1
 
 ALT_MIN, ALT_MAX = 0.0, 90.0
 
+WYLIE = Observer(latitude_deg=33.0151, longitude_deg=-96.5389, name="Wylie, TX")
+
 
 class Pointer:
     def __init__(self, mount):
         self.m = mount
-        # For now, wherever the motors are at connect is alt 0, az 0.
-        # Real homing with endstops replaces this later.
+        # For now, wherever the motors are at connect is alt 0, az 0,
+        # and the mount must be level and facing true north.
+        # Endstop homing and calibration replace this later.
         pos, _ = self.m.status()
         self.home = pos
 
@@ -46,3 +52,10 @@ class Pointer:
         if wait:
             self.m.wait()
 
+    def point_at(self, name, observer=WYLIE, when=None):
+        when = when or datetime.now(timezone.utc)
+        target = look_up(name, observer, when)
+        if not target.visible:
+            raise ValueError(f"{name} is below the horizon: {target}")
+        self.goto(target.altitude_deg, target.azimuth_deg)
+        return target
