@@ -86,3 +86,9 @@ Printed the lid center section, 2mm spacer, and test turntable on the P2S and as
 I used M5 x 25 countersunk screws on both rings, since both rings have countersinks. Washers under the nuts for stability. All eight screws went in freely, so the 107 and 82 bolt circles are confirmed.
 
 The turntable spins freely with no rubbing. The inner ring screw heads are reachable from below through the 96mm lid opening, as long as the outer ring screws go in first. That is the only assembly order that matters.
+
+## 2026-09-21: 608 bearing housing test
+
+Printed the bearing housing and retainer and assembled with a 608-2RS. The bearing pressed into the 22.0 pocket by hand and seated on the shoulder. Retainer held with four M3 x 25 socket head screws, washers on both sides.
+
+The bearing spins freely with no extra drag after assembly. The printed shoulder only touches the outer ring, not the seal. This housing design goes into the fork.
