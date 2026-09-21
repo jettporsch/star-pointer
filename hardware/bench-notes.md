@@ -78,3 +78,11 @@ Nucleo 3V3 moved to its own breadboard rail. That rail powers SLEEP on both driv
 At 1/16, 3200 steps is exactly one motor revolution. With the 4:1 belt reduction that works out to about 35.6 steps per degree at the output.
 
 I put a piece of tape on each motor shaft and confirmed 3200 steps gives one full revolution on both motors.
+
+## 2026-09-21: Lazy susan stack test
+
+Printed the lid center section, 2mm spacer, and test turntable on the P2S and assembled them with the real lazy susan.
+
+I used M5 x 25 countersunk screws on both rings, since both rings have countersinks. Washers under the nuts for stability. All eight screws went in freely, so the 107 and 82 bolt circles are confirmed.
+
+The turntable spins freely with no rubbing. The inner ring screw heads are reachable from below through the 96mm lid opening, as long as the outer ring screws go in first. That is the only assembly order that matters.
