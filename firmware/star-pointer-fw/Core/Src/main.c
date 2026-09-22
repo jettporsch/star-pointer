@@ -119,6 +119,13 @@ int main(void)
 
   axes[0] = (Axis){ &htim3, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0, 0, 0, 1 };
   axes[1] = (Axis){ &htim2, TIM_CHANNEL_3, DIR2_GPIO_Port, DIR2_Pin, 0, 0, 0, 1 };
+  /* default step period 600us: 3x margin over motor 2's
+     unloaded limit (stalls at 150, clean at 200) */
+  for (int i = 0; i < 2; i++)
+  {
+    __HAL_TIM_SET_AUTORELOAD(axes[i].htim, 599);
+    __HAL_TIM_SET_COMPARE(axes[i].htim, axes[i].channel, 300);
+  }
   uart_print("star pointer ready\r\n");
 
 
@@ -264,6 +271,7 @@ void handle_line(const char *line)
 {
   int axis;
   long steps;
+  long us;
   char buf[64];
 
   if (sscanf(line, "M %d %ld", &axis, &steps) == 2)
@@ -282,6 +290,17 @@ void handle_line(const char *line)
   else if (strcmp(line, "X") == 0)
   {
     axis_stop_all();
+    uart_print("OK\r\n");
+  }
+  else if (sscanf(line, "V %ld", &us) == 1)
+  {
+    if (us < 100 || us > 20000) { uart_print("ERR bad period\r\n"); return; }
+    if (axes[0].busy || axes[1].busy) { uart_print("ERR busy\r\n"); return; }
+    for (int i = 0; i < 2; i++)
+    {
+      __HAL_TIM_SET_AUTORELOAD(axes[i].htim, us - 1);
+      __HAL_TIM_SET_COMPARE(axes[i].htim, axes[i].channel, us / 2);
+    }
     uart_print("OK\r\n");
   }
   else

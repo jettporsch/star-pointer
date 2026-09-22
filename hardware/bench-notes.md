@@ -108,3 +108,15 @@ Hooked `pointer.py` up to `skycoords.py`. `point_at("Vega")` now looks up the st
 For now, home has to be level and facing true north for the pointing to be right. Endstop homing and calibration handle that once the mount is built.
 
 Tested with Vega, Arcturus, and Sirius. Vega's commanded and actual positions agreed within 0.012 degrees, which is under half a step, so the only error is rounding to whole steps. Sirius was below the horizon and was refused with no movement.
+
+## 2026-09-21: Step speed
+
+Added a `V <us>` serial command that sets the step period for both axes in microseconds, so speed can be tested live without rebuilding. Refuses changes while a motor is moving.
+
+Tested one full rev at each speed with a tape flag, unloaded, no acceleration ramp:
+- Motor 1: clean all the way down to 100us (10,000 steps/s)
+- Motor 2: stalls at 100, hit or miss at 150, clean at 200 and up
+
+A stalled motor makes noise but doesn't turn, and the firmware still counts the steps, so position is silently wrong. That's why the default has margin.
+
+Default step period is now 600us at startup, 3x slower than motor 2's clean limit. That's about 47 degrees per second at the output, 180 degrees in about 4 seconds, down from 30 seconds before. To revisit once the mount is under real load, and after checking driver 2's Vref, which may explain the difference between motors.
