@@ -132,3 +132,13 @@ Tested in the browser: tapping Vega moved the motors there and the readout showe
 Correction to the step speed note: both drivers are set to nearly the same Vref (0.595V and 0.603V), so current doesn't explain motor 2's lower speed limit. Likely normal variation between motors.
 
 Current UI is dark red for night vision. The plan later is a purple and yellow theme to match the mount's final look, with red kept as a night mode.
+
+## 2026-09-22: Fork stage assembled
+
+Printed and assembled the gusseted fork: two uprights with 608 bearings and retainers, slotted altitude motor plate with a spare NEMA 17, and the 196mm stage turntable, mounted on the lazy susan and lid center test.
+
+The shaft passes through both bearings and turns freely with the feet tightened. Shaft collars on each side stop it sliding. Both pulleys reach their specified positions and their tooth bands line up. No visible flex at the top of the uprights under hand pressure. Belt tension is reasonable with the motor near mid-slot.
+
+Ordered the 280mm GT2 belt, which is the calculated length for the 88mm center distance the slots are built around.
+
+Next is the laser cradle.
