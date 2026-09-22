@@ -120,3 +120,15 @@ Tested one full rev at each speed with a tape flag, unloaded, no acceleration ra
 A stalled motor makes noise but doesn't turn, and the firmware still counts the steps, so position is silently wrong. That's why the default has margin.
 
 Default step period is now 600us at startup, 3x slower than motor 2's clean limit. That's about 47 degrees per second at the output, 180 degrees in about 4 seconds, down from 30 seconds before. To revisit once the mount is under real load, and after checking driver 2's Vref, which may explain the difference between motors.
+
+## 2026-09-21: Web interface
+
+Added `app/web.py`, a Flask app that runs on the laptop at localhost:8000. It lists all 22 catalog stars sorted by altitude with live alt/az, grays out stars below the horizon, points the mount when a star is tapped, shows live position, and has a stop button.
+
+Moves start without blocking, and the page polls position twice a second, so stop works mid-move. A lock keeps requests from talking over each other on the serial port.
+
+Tested in the browser: tapping Vega moved the motors there and the readout showed when it arrived. Stop halted a move immediately. Below-horizon stars can't be tapped. Speed at the 600us default feels right for pointing.
+
+Correction to the step speed note: both drivers are set to nearly the same Vref (0.595V and 0.603V), so current doesn't explain motor 2's lower speed limit. Likely normal variation between motors.
+
+Current UI is dark red for night vision. The plan later is a purple and yellow theme to match the mount's final look, with red kept as a night mode.
