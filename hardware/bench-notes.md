@@ -150,3 +150,11 @@ Added `L 1` and `L 0` serial commands to switch the laser on and off through PA9
 Tested with a multimeter on D8: 3.3V after `L 1`, 0V after `L 0`, and 0V after `X`.
 
 The laser itself needs more current than a GPIO pin can supply, so it switches through an NPN transistor with a 1k resistor on the base, laser red to 5V and black to the collector. Transistor and resistor kits are ordered. The firmware side is done and waiting on parts.
+
+## 2026-09-22: Laser cradle
+
+Printed and fitted the laser cradle. It clamps the 8mm rod with the lower cap and holds the laser module with the upper cap. Both use the bore sizes from the coupon tests, 8.2 for the rod and 12.0 for the laser.
+
+Rotated the rod a full 360 degrees with the laser mounted and nothing contacts the uprights, belt, or pulley. Altitude only needs 0 to 90, so there's plenty of room.
+
+The specified screws are longer than needed and stick out past the nuts. Cosmetic, swapping for shorter ones.
