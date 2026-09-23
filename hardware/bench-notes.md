@@ -166,3 +166,9 @@ Installed the altitude home hardware on the left upright: a bracket that bolts o
 It works as intended. The cam reaches the lever and the carrier slides to set the trip height.
 
 The carrier is still adjustable because I don't know this switch's actual sensitivity yet. Next step is measuring the real trip point, release point, and how much lever travel is left before it bottoms out, using a multimeter across the switch contacts. Those numbers set the cam lift and let the carrier height be fixed in the next revision instead of adjustable.
+
+## 2026-09-23: Altitude drive powered test
+
+Fitted the 280mm GT2 belt between the 20T motor pulley and the 80T shaft pulley and ran the altitude axis under power for the first time.
+
+Started slow at 2000us with small moves, then worked up. 3200 steps gives 90 degrees of tilt, which matches the 35.56 steps per degree from the 4:1 reduction. Moving out 3200 and back 3200 returned the laser to a tape mark, so no teeth were skipped. Motion is smooth, the belt tracks without rubbing, and nothing catches through the range.
