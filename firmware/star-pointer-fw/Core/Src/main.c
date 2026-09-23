@@ -51,6 +51,9 @@ typedef struct {
 #define LASER_PORT GPIOA
 #define LASER_PIN  GPIO_PIN_9
 
+#define ALT_ES_PORT GPIOA
+#define ALT_ES_PIN  GPIO_PIN_10
+
 
 /* USER CODE END PD */
 
@@ -324,6 +327,14 @@ void handle_line(const char *line)
   {
     HAL_GPIO_WritePin(LASER_PORT, LASER_PIN, GPIO_PIN_RESET);
     uart_print("OK\r\n");
+  }
+
+
+  else if (strcmp(line, "E") == 0)
+  {
+    int alt = (HAL_GPIO_ReadPin(ALT_ES_PORT, ALT_ES_PIN) == GPIO_PIN_RESET);
+    snprintf(buf, sizeof(buf), "ES ALT %d\r\n", alt);
+    uart_print(buf);
   }
 
 

@@ -172,3 +172,13 @@ The carrier is still adjustable because I don't know this switch's actual sensit
 Fitted the 280mm GT2 belt between the 20T motor pulley and the 80T shaft pulley and ran the altitude axis under power for the first time.
 
 Started slow at 2000us with small moves, then worked up. 3200 steps gives 90 degrees of tilt, which matches the 35.56 steps per degree from the 4:1 reduction. Moving out 3200 and back 3200 returned the laser to a tape mark, so no teeth were skipped. Motion is smooth, the belt tracks without rubbing, and nothing catches through the range.
+
+## 2026-09-23: Altitude endstop reading
+
+Added an `E` command that reports endstop state over serial. The altitude switch is on PA10 (D2) with an internal pull-up.
+
+The endstop boards have their own 10K pull-up, LED, and debounce cap, wired out to S, G, V. Wired G to ground, S to D2, and V to 3V3. With that board, the pin reads high when the lever is free and low when pressed, so the firmware inverts it. `E` now reports 0 for free and 1 for triggered.
+
+Tradeoff worth noting: going through the board's S pin means a disconnected wire reads as not triggered, so homing would keep driving. Wiring S straight to the switch's NC pin instead would fail toward stopping, at the cost of the board's LED and debounce. Keeping the current wiring while homing is supervised on the bench.
+
+Next step is using `E` to find the exact step count where the cam trips, which sets level zero without measuring by hand.
