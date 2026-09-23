@@ -38,3 +38,14 @@ Measured hub face down.
 - Lazy susan: 120.13 OD, 70 center opening, 8.5 thick with pads removed
 - Endstop: 20 x 20 board, 3mm holes, 15 spacing
 - Laser: 12 dia x 38 long, 3 to 5V
+
+## Endstop switch
+
+Board is 20 x 20 with 3mm holes on 15mm centers. Switch body 12.85 wide, lever about 13 long. Pins labeled C, NO, NC.
+
+Lever travel, measured with calipers:
+- Total travel from free to fully pressed: about 3mm
+- Trips at about 2mm of travel
+- About 1mm of overtravel left after the trip
+
+Cam lift should be about 2.5mm: past the trip point with margin, without bottoming the lever.
