@@ -158,3 +158,11 @@ Printed and fitted the laser cradle. It clamps the 8mm rod with the lower cap an
 Rotated the rod a full 360 degrees with the laser mounted and nothing contacts the uprights, belt, or pulley. Altitude only needs 0 to 90, so there's plenty of room.
 
 The specified screws are longer than needed and stick out past the nuts. Cosmetic, swapping for shorter ones.
+
+## 2026-09-22: Altitude home assembly
+
+Installed the altitude home hardware on the left upright: a bracket that bolts over the existing bearing retainer using the same four screws, an adjustable switch carrier, and a cam that clamps to the rod outside the fork.
+
+It works as intended. The cam reaches the lever and the carrier slides to set the trip height.
+
+The carrier is still adjustable because I don't know this switch's actual sensitivity yet. Next step is measuring the real trip point, release point, and how much lever travel is left before it bottoms out, using a multimeter across the switch contacts. Those numbers set the cam lift and let the carrier height be fixed in the next revision instead of adjustable.
