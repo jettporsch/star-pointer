@@ -47,6 +47,11 @@ typedef struct {
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+
+#define LASER_PORT GPIOA
+#define LASER_PIN  GPIO_PIN_9
+
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -127,6 +132,8 @@ int main(void)
     __HAL_TIM_SET_COMPARE(axes[i].htim, axes[i].channel, 300);
   }
   uart_print("star pointer ready\r\n");
+
+  HAL_GPIO_WritePin(LASER_PORT, LASER_PIN, GPIO_PIN_RESET);
 
 
   /* USER CODE END 2 */
@@ -238,6 +245,10 @@ int axis_move(Axis *ax, int32_t steps)
 
 void axis_stop_all(void)
 {
+
+	  HAL_GPIO_WritePin(LASER_PORT, LASER_PIN, GPIO_PIN_RESET);
+
+
   for (int i = 0; i < 2; i++)
   {
     __disable_irq();
@@ -303,6 +314,19 @@ void handle_line(const char *line)
     }
     uart_print("OK\r\n");
   }
+
+  else if (strcmp(line, "L 1") == 0)
+  {
+    HAL_GPIO_WritePin(LASER_PORT, LASER_PIN, GPIO_PIN_SET);
+    uart_print("OK\r\n");
+  }
+  else if (strcmp(line, "L 0") == 0)
+  {
+    HAL_GPIO_WritePin(LASER_PORT, LASER_PIN, GPIO_PIN_RESET);
+    uart_print("OK\r\n");
+  }
+
+
   else
   {
     uart_print("ERR unknown\r\n");

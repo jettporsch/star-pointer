@@ -142,3 +142,11 @@ The shaft passes through both bearings and turns freely with the feet tightened.
 Ordered the 280mm GT2 belt, which is the calculated length for the 88mm center distance the slots are built around.
 
 Next is the laser cradle.
+
+## 2026-09-22: Laser control
+
+Added `L 1` and `L 0` serial commands to switch the laser on and off through PA9 (D8 on the header). The pin starts low at power-up, so the laser is off until it's deliberately turned on. `axis_stop_all` also drives it low, so the stop command kills the beam along with the motors.
+
+Tested with a multimeter on D8: 3.3V after `L 1`, 0V after `L 0`, and 0V after `X`.
+
+The laser itself needs more current than a GPIO pin can supply, so it switches through an NPN transistor with a 1k resistor on the base, laser red to 5V and black to the collector. Transistor and resistor kits are ordered. The firmware side is done and waiting on parts.
