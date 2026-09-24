@@ -54,6 +54,8 @@ typedef struct {
 #define ALT_ES_PORT GPIOA
 #define ALT_ES_PIN  GPIO_PIN_10
 
+/* steps from the switch release edge up to laser level */
+#define ALT_HOME_OFFSET 0
 
 /* USER CODE END PD */
 
@@ -82,6 +84,7 @@ void uart_print(const char *s);
 int axis_move(Axis *ax, int32_t steps);
 void axis_stop_all(void);
 void handle_line(const char *line);
+void home_altitude(void);
 
 /* USER CODE END PFP */
 
@@ -246,6 +249,75 @@ int axis_move(Axis *ax, int32_t steps)
   return 0;
 }
 
+
+static int alt_triggered(void)
+{
+  return HAL_GPIO_ReadPin(ALT_ES_PORT, ALT_ES_PIN) == GPIO_PIN_RESET;
+}
+
+/* Blocking move of one axis, used only during homing. */
+static int home_step(int32_t steps)
+{
+  if (axis_move(&axes[0], steps)) return 1;
+  while (axes[0].busy) { }
+  return 0;
+}
+
+void home_altitude(void)
+{
+  uint32_t saved = __HAL_TIM_GET_AUTORELOAD(axes[0].htim);
+  int found = 0;
+
+  /* The cam can only be approached from below: coming down, the lever
+     tip catches the clamp slot. So homing always drives up from below. */
+
+  /* if we're already on the cam, back off below it first */
+  if (alt_triggered())
+  {
+    for (int i = 0; i < 80; i++)
+    {
+      home_step(-50);
+      if (!alt_triggered()) { found = 1; break; }
+    }
+    if (!found) { uart_print("ERR no release\r\n"); goto done; }
+    home_step(-100);
+    found = 0;
+  }
+
+  /* 1. fast approach up until the switch trips */
+  __HAL_TIM_SET_AUTORELOAD(axes[0].htim, 1999);
+  __HAL_TIM_SET_COMPARE(axes[0].htim, axes[0].channel, 1000);
+  for (int i = 0; i < 80; i++)
+  {
+    home_step(50);
+    if (alt_triggered()) { found = 1; break; }
+  }
+  if (!found) { uart_print("ERR no switch\r\n"); goto done; }
+
+  /* 2. back off below the trip point */
+  home_step(-400);
+  if (alt_triggered()) { uart_print("ERR stuck on\r\n"); goto done; }
+
+  /* 3. slow approach up to the same edge */
+  __HAL_TIM_SET_AUTORELOAD(axes[0].htim, 5999);
+  __HAL_TIM_SET_COMPARE(axes[0].htim, axes[0].channel, 3000);
+  found = 0;
+  for (int i = 0; i < 200; i++)
+  {
+    home_step(5);
+    if (alt_triggered()) { found = 1; break; }
+  }
+  if (!found) { uart_print("ERR no edge\r\n"); goto done; }
+
+  /* 4. the first trip coming up is level */
+  axes[0].pos = 0;
+  uart_print("HOMED\r\n");
+
+done:
+  __HAL_TIM_SET_AUTORELOAD(axes[0].htim, saved);
+  __HAL_TIM_SET_COMPARE(axes[0].htim, axes[0].channel, (saved + 1) / 2);
+}
+
 void axis_stop_all(void)
 {
 
@@ -336,6 +408,13 @@ void handle_line(const char *line)
     snprintf(buf, sizeof(buf), "ES ALT %d\r\n", alt);
     uart_print(buf);
   }
+
+
+  else if (strcmp(line, "H") == 0)
+  {
+    home_altitude();
+  }
+
 
 
   else

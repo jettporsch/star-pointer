@@ -182,3 +182,17 @@ The endstop boards have their own 10K pull-up, LED, and debounce cap, wired out 
 Tradeoff worth noting: going through the board's S pin means a disconnected wire reads as not triggered, so homing would keep driving. Wiring S straight to the switch's NC pin instead would fail toward stopping, at the cost of the board's LED and debounce. Keeping the current wiring while homing is supervised on the bench.
 
 Next step is using `E` to find the exact step count where the cam trips, which sets level zero without measuring by hand.
+
+## 2026-09-23: Altitude homing
+
+Installed the V2 fixed home bracket, carrier, and cam. Homing approaches level from below, because coming down the lever tip catches the cam's clamp slot. The cam is clamped so the switch trips exactly at level, set with a level while the motor held position.
+
+Added an `H` command. It backs off below the cam if already on it, drives up until the switch trips, backs off 400 steps, then creeps up at 6000us in 5-step increments and calls the first trip zero. Worst case overshoot is 5 steps, 0.14 degrees. Each search is bounded, so a disconnected switch errors out instead of driving on.
+
+Tested repeatedly from different starting positions below level and it lands level each time.
+
+Also found the 600us default step speed is too fast now that the cradle, laser, and belt are on the axis. It stalls starting from rest. 2000us works. Acceleration ramps would let it run faster and start reliably, worth doing later.
+
+Shaft collars installed inside the fork, one against each bearing, with no added drag.
+
+Note on procedure: the cam is the harder thing to set and the cradle is the easier one, so it would be better to treat the cam as the fixed reference and level the cradle against it, rather than the reverse. If anything slips, home first, then loosen the cradle and level the laser to the cam's edge.
