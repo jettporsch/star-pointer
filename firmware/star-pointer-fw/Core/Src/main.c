@@ -57,6 +57,9 @@ typedef struct {
 #define AZ_ES_PORT GPIOB
 #define AZ_ES_PIN  GPIO_PIN_6
 
+/* az homing search limit, 50-step chunks, about 190 deg */
+#define AZ_SEARCH_CHUNKS 135
+
 /* steps from the switch release edge up to laser level */
 #define ALT_HOME_OFFSET 0
 
@@ -88,6 +91,7 @@ int axis_move(Axis *ax, int32_t steps);
 void axis_stop_all(void);
 void handle_line(const char *line);
 void home_altitude(void);
+void home_azimuth(void);
 
 /* USER CODE END PFP */
 
@@ -326,6 +330,73 @@ done:
   __HAL_TIM_SET_COMPARE(axes[0].htim, axes[0].channel, (saved + 1) / 2);
 }
 
+/* Blocking move of any axis, used during homing. */
+static void move_wait(Axis *ax, int32_t steps)
+{
+  while (ax->busy) { }
+  axis_move(ax, steps);
+  while (ax->busy) { }
+}
+
+static void set_period(Axis *ax, uint32_t us)
+{
+  __HAL_TIM_SET_AUTORELOAD(ax->htim, us - 1);
+  __HAL_TIM_SET_COMPARE(ax->htim, ax->channel, us / 2);
+}
+
+void home_azimuth(void)
+{
+  Axis *az = &axes[1];
+  uint32_t saved = __HAL_TIM_GET_AUTORELOAD(az->htim) + 1;
+  int found = 0;
+  char buf[32];
+
+  /* Positive is CW. Home is the edge where the lever trips going CW. */
+  set_period(az, 2000);
+
+  /* if on the lobe, drive CCW off it and clear the hysteresis first,
+     so every start takes the same path below */
+  if (az_triggered())
+  {
+    for (int i = 0; i < AZ_SEARCH_CHUNKS; i++)
+    {
+      move_wait(az, -50);
+      if (!az_triggered()) { found = 1; break; }
+    }
+    if (!found) { uart_print("ERR no release\r\n"); goto done; }
+    move_wait(az, -400);
+  }
+
+  /* fast CW search until it trips */
+  found = 0;
+  for (int i = 0; i < AZ_SEARCH_CHUNKS; i++)
+  {
+    move_wait(az, 50);
+    if (az_triggered()) { found = 1; break; }
+  }
+  if (!found) { uart_print("ERR no switch\r\n"); goto done; }
+
+  /* back off CCW past the ~215 step hysteresis */
+  move_wait(az, -400);
+  if (az_triggered()) { uart_print("ERR stuck on\r\n"); goto done; }
+
+  /* creep CW one step at a time into the trip edge */
+  set_period(az, 6000);
+  found = 0;
+  for (int i = 0; i < 1000; i++)
+  {
+    move_wait(az, 1);
+    if (az_triggered()) { found = 1; break; }
+  }
+  if (!found) { uart_print("ERR no edge\r\n"); goto done; }
+
+  snprintf(buf, sizeof(buf), "HOMED %ld\r\n", (long)az->pos);
+  az->pos = 0;
+  uart_print(buf);
+
+done:
+  set_period(az, saved);
+}
 void axis_stop_all(void)
 {
 
@@ -421,6 +492,11 @@ void handle_line(const char *line)
   else if (strcmp(line, "H") == 0)
   {
     home_altitude();
+  }
+
+  else if (strcmp(line, "H AZ") == 0)
+  {
+    home_azimuth();
   }
 
 

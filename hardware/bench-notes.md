@@ -208,3 +208,29 @@ Second, the azimuth pin was wrong in firmware. PB2 was listed as D10, but D10 on
 Third, mechanical. With the electrical path working, the cam lobe turned out to be about 1mm short of pushing the lever to its trip point. Contact happens but never clicks. Reprinting the cam with 1mm more lift at the lobe peak. The lever has about 1mm of overtravel past the trip, so 1mm more lift should trip without bottoming it.
 
 Next after the reprint: confirm the trip in both rotation directions, measure how many degrees the lobe stays triggered, then write the azimuth homing routine. Unlike altitude's wide plateau, this cam has a single bump so the switch is off for most of a revolution.
+
+## 2026-10-04: Azimuth cam reprint and homing
+
+The reprinted cam with 1mm more lift trips the switch, and the lever doesn't bottom out on the lobe peak.
+
+The az belt had too much sag with the motor on the adjustable slides. Next revision of the az motor mount should be a fixed position, slightly farther back, instead of slotted.
+
+STEP2 dropped out twice. M 2 replied OK and S counted the steps, but the motor was silent and didn't turn. The connection between D6 and driver 2's STEP pin was intermittent. Reseating fixed it once, then it came back, so I replaced the jumper and pressed driver 2 down into the breadboard. Breadboard contacts keep causing problems, the drivers should go on a soldered board eventually.
+
+Positive az steps turn the stage clockwise looking down.
+
+Added `app/az_cam_sweep.py`. It steps az 5 steps at a time, checks E after each, and logs every switch edge forward then back. Currently set to a 120 degree sweep.
+
+Results: the lobe is about 80 degrees wide (on from 2649 to 5489 going CW, 5264 to 2434 going CCW). There's about a 6 degree gap between directions on both edges (215 and 225 steps). That could be switch hysteresis or belt backlash, this test can't separate them. The CW trip edge was clean. The release edge was less consistent and chattered once.
+
+The cables went tight near the end of the 120 degree sweep. Moved things closer for more slack. Az needs a full 360 degrees of cable travel with home in the middle.
+
+An 80 degree lobe only partly fixes the power-up direction problem. Switch on means you know where you are, switch off covers the other 280 degrees and is still ambiguous. Next cam revision is a half-moon: same lift, same ramp on the CW-trip edge, raised section stretched to 180 degrees. Then the switch state at power-up tells homing which way to go.
+
+Added an `H AZ` command. If on the lobe, it drives CCW until it releases and backs off 400 more. Then it searches CW until it trips, backs off 400, and creeps CW one step at a time to the trip edge, which is zero. `HOMED` prints where the old count thought the edge was before zeroing, so repeatability shows up directly. `H` still homes altitude.
+
+Fixed a bug where `move_wait` skipped moves if the axis was still busy from a previous command.
+
+Repeatability is about plus or minus 13 steps, roughly 0.38 degrees, over 6 homes from both sides. The error budget has 0.05 degrees for homing. Either the switch trip point is that loose because the cam ramp is shallow, or steps are getting lost somewhere. A fixed home offset gets absorbed by two-star alignment, so this only matters when re-homing without realigning.
+
+Next: laser on a wall about 3m away to see if the stage physically stops in the same spot each home. Same spot with scattered HOMED numbers means lost steps. Spot moving means the switch.
