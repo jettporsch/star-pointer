@@ -84,7 +84,7 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
 - [x] RA/Dec to alt/az transform, precession, refraction
 - [x] Validation suite
 - [ ] Serial protocol spec
-- [ ] STM32 stepper control, both axes
+- [x] STM32 stepper control, both axes
 - [ ] Limit switches and homing
 - [ ] Mechanical build
 - [ ] Two-star alignment
