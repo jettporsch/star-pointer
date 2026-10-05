@@ -54,6 +54,9 @@ typedef struct {
 #define ALT_ES_PORT GPIOA
 #define ALT_ES_PIN  GPIO_PIN_10
 
+#define AZ_ES_PORT GPIOB
+#define AZ_ES_PIN  GPIO_PIN_6
+
 /* steps from the switch release edge up to laser level */
 #define ALT_HOME_OFFSET 0
 
@@ -255,6 +258,11 @@ static int alt_triggered(void)
   return HAL_GPIO_ReadPin(ALT_ES_PORT, ALT_ES_PIN) == GPIO_PIN_RESET;
 }
 
+static int az_triggered(void)
+{
+  return HAL_GPIO_ReadPin(AZ_ES_PORT, AZ_ES_PIN) == GPIO_PIN_RESET;
+}
+
 /* Blocking move of one axis, used only during homing. */
 static int home_step(int32_t steps)
 {
@@ -404,8 +412,8 @@ void handle_line(const char *line)
 
   else if (strcmp(line, "E") == 0)
   {
-    int alt = (HAL_GPIO_ReadPin(ALT_ES_PORT, ALT_ES_PIN) == GPIO_PIN_RESET);
-    snprintf(buf, sizeof(buf), "ES ALT %d\r\n", alt);
+    snprintf(buf, sizeof(buf), "ES ALT %d AZ %d\r\n",
+             alt_triggered(), az_triggered());
     uart_print(buf);
   }
 

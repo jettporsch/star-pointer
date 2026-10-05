@@ -196,3 +196,15 @@ Also found the 600us default step speed is too fast now that the cradle, laser, 
 Shaft collars installed inside the fork, one against each bearing, with no added drag.
 
 Note on procedure: the cam is the harder thing to set and the cradle is the easier one, so it would be better to treat the cam as the fixed reference and level the cradle against it, rather than the reverse. If anything slips, home first, then loosen the cradle and level the laser to the cam's edge.
+
+## 2026-10-04: Azimuth endstop debugging
+
+The azimuth endstop read 0 no matter what. Two separate faults stacked on top of each other.
+
+First, both endstops went dead at once. The 3V3 wire feeding the endstop boards had worked partly out of the breadboard. Reseating it brought altitude back.
+
+Second, the azimuth pin was wrong in firmware. PB2 was listed as D10, but D10 on the Nucleo-F401RE is PB6. PB2 is only on the Morpho header, so the firmware was reading a pin with nothing attached, and the internal pullup held it high forever. Moved the config to PB6 in CubeMX, changed AZ_ES_PIN to GPIO_PIN_6, and left the wire on D10. E now reports AZ correctly from the lever.
+
+Third, mechanical. With the electrical path working, the cam lobe turned out to be about 1mm short of pushing the lever to its trip point. Contact happens but never clicks. Reprinting the cam with 1mm more lift at the lobe peak. The lever has about 1mm of overtravel past the trip, so 1mm more lift should trip without bottoming it.
+
+Next after the reprint: confirm the trip in both rotation directions, measure how many degrees the lobe stays triggered, then write the azimuth homing routine. Unlike altitude's wide plateau, this cam has a single bump so the switch is off for most of a revolution.
