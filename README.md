@@ -4,8 +4,7 @@ A two-axis motorized mount that points a laser at any star you pick on your
 laptop. It works out where to aim from your location, the current time, and a
 two-star alignment done at setup.
 
-**Status:** in development. Coordinate math is working. Motion control not
-started.
+**Status:** in development. Coordinate math is working. Firmware drives both axes over USB serial with endstop homing on both axes. Next up is laser wiring and two-star alignment.
 
 **Design target:** ±0.5° pointing accuracy.
 
@@ -81,14 +80,15 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
 
 ## Progress
 
-- [x] RA/Dec to alt/az transform, precession, refraction
-- [x] Validation suite
-- [ ] Serial protocol spec
-- [x] STM32 stepper control, both axes
-- [ ] Limit switches and homing
-- [ ] Mechanical build
-- [ ] Two-star alignment
-- [ ] End-to-end GOTO
-- [ ] Custom PCB
-- [ ] Laser interlock
-- [ ] Sidereal tracking
+   - [x] RA/Dec to alt/az transform, precession, refraction
+   - [x] Validation suite
+   - [x] STM32 stepper control, both axes
+   - [x] Altitude homing
+   - [x] Prototype mount built
+   - [ ] Azimuth homing (working; half-turn cam and repeatability pending)
+   - [ ] Serial protocol spec (commands implemented, doc not written)
+   - [ ] Laser wiring and interlock
+   - [ ] Two-star alignment
+   - [ ] End-to-end GOTO
+   - [ ] Sidereal tracking
+   - [ ] Custom PCB
