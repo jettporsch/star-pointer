@@ -1,0 +1,32 @@
+star pointer ready
+V 2000
+OK
+H AZ
+HOMED 1873
+M 2 -3000
+OK
+M 2 3000
+OK
+M 2 300   -3000
+OK
+M 2 3000
+OK
+M 2 -3000
+OK
+M 2 3000
+OK
+M 2 -3000
+OK
+M 2 3000
+OK
+H AZ
+HOMED 42
+[B[B[B[B[B[B[B[B[B[Bstar pointer ready
+L 1
+OK
+KL  L 0
+OK
+L 1
+OK
+X
+OK

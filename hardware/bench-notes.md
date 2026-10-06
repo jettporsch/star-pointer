@@ -248,3 +248,15 @@ Added the current full assembly STEP and the two new print files to `hardware/ca
 Expected: the new ramp is about 3x steeper where the switch trips, so if the homing scatter is coming from the switch, the ±0.38 degrees should drop to around ±0.12 and the 6 degree direction gap to about 2. Not tested yet.
 
 Next: power up, measure the new switch window, rerun homing repeatability, then the laser wall test.
+
+## 2026-10-05: Laser wired, az switch homing dropped
+
+Mapped the new half-turn cam with `app/az_walk.py`. Going CCW, the switch releases cleanly off the steep ramp. Going CW back up the steep ramp, it doesn't click on until about 34 degrees onto the flat top. On the flat top the lever is pushed far enough to hold the switch on but not far enough to click it on, so the old homing routine, which expected a click on the steep ramp, got stuck. Compared the cam STEP to the previous +1.0mm cam: same 14.5/18.5mm radii, rim, height, and clamp, so the file isn't the cause. The switch is acting about half a mm farther out than with the old cam.
+
+Rewrote `H AZ` to home on the CCW release edge instead. It works, but the HOMED numbers drifted about 70 steps when starting from off the cam. A test of plain moves (four ±3000 step round trips, then home) came back 42 steps off, within homing scatter, so normal moves aren't losing steps.
+
+Dropped switch homing for az. It only locates the stage relative to the base, and two-star alignment handles where it points in the sky every session. The only real job left is cable management, which an index mark does. For now az zero is a pencil mark on the base and stage, lined up before power-on. Later, a penny-width slot in the turntable rim and lid will lock it in place. `H AZ` stays in the firmware as a test tool. Alt homing stays.
+
+Wired the laser through a 2N2222: D8 to a 330 ohm resistor to the base, emitter to GND, collector to the laser's black wire, laser red to 5V. Used 330 instead of the 1k planned earlier because green diodes can pull 100+mA and 1k only switches about 25mA cleanly. `L 1` turns it on at full brightness, same as wired straight to 5V. `L 0` turns it off, and `X` kills it.
+
+Next: laser auto-off timer, alt homing on connect in pointer.py, jog controls, two-star alignment.

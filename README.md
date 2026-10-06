@@ -85,9 +85,10 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
    - [x] STM32 stepper control, both axes
    - [x] Altitude homing
    - [x] Prototype mount built
-   - [ ] Azimuth homing (working; half-turn cam and repeatability pending)
+   - [x] Azimuth zero (manual index mark; switch homing kept as a test tool)
    - [ ] Serial protocol spec (commands implemented, doc not written)
-   - [ ] Laser wiring and interlock
+   - [x] Laser wiring and interlock
+- [ ] Laser auto-off timer
    - [ ] Two-star alignment
    - [ ] End-to-end GOTO
    - [ ] Sidereal tracking

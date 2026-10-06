@@ -63,6 +63,11 @@ typedef struct {
 /* steps from the switch release edge up to laser level */
 #define ALT_HOME_OFFSET 0
 
+/* az homing CW search limit, 50-step chunks, about 230 deg */
+#define AZ_CW_CHUNKS 164
+/* start the final creep this many steps short of the edge, about 4 deg */
+#define AZ_CREEP_START 150
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -348,45 +353,57 @@ void home_azimuth(void)
 {
   Axis *az = &axes[1];
   uint32_t saved = __HAL_TIM_GET_AUTORELOAD(az->htim) + 1;
-  int found = 0;
+  int found;
+  int32_t edge;
   char buf[32];
 
-  /* Positive is CW. Home is the edge where the lever trips going CW. */
+  /* Positive is CW. Home is where the switch RELEASES going CCW off the
+     steep ramp. Going CW the switch doesn't click until partway onto the
+     flat top, so that edge isn't used. */
   set_period(az, 2000);
 
-  /* if on the lobe, drive CCW off it and clear the hysteresis first,
-     so every start takes the same path below */
-  if (az_triggered())
+  /* 1. if off, go CW until it clicks on */
+  if (!az_triggered())
   {
-    for (int i = 0; i < AZ_SEARCH_CHUNKS; i++)
+    found = 0;
+    for (int i = 0; i < AZ_CW_CHUNKS; i++)
     {
-      move_wait(az, -50);
-      if (!az_triggered()) { found = 1; break; }
+      move_wait(az, 50);
+      if (az_triggered()) { found = 1; break; }
     }
-    if (!found) { uart_print("ERR no release\r\n"); goto done; }
-    move_wait(az, -400);
+    if (!found) { uart_print("ERR no switch\r\n"); goto done; }
   }
 
-  /* fast CW search until it trips */
+  /* 2. fast CCW until it releases, remember roughly where */
   found = 0;
   for (int i = 0; i < AZ_SEARCH_CHUNKS; i++)
+  {
+    move_wait(az, -50);
+    if (!az_triggered()) { found = 1; break; }
+  }
+  if (!found) { uart_print("ERR no release\r\n"); goto done; }
+  edge = az->pos;
+
+  /* 3. back CW until it clicks on again, so the final approach
+        is always CCW from the on side */
+  found = 0;
+  for (int i = 0; i < AZ_CW_CHUNKS; i++)
   {
     move_wait(az, 50);
     if (az_triggered()) { found = 1; break; }
   }
-  if (!found) { uart_print("ERR no switch\r\n"); goto done; }
+  if (!found) { uart_print("ERR no retrip\r\n"); goto done; }
 
-  /* back off CCW past the ~215 step hysteresis */
-  move_wait(az, -400);
-  if (az_triggered()) { uart_print("ERR stuck on\r\n"); goto done; }
+  /* 4. fast CCW to just short of the edge, then creep one step at a time */
+  move_wait(az, (edge + AZ_CREEP_START) - az->pos);
+  if (!az_triggered()) { uart_print("ERR lost switch\r\n"); goto done; }
 
-  /* creep CW one step at a time into the trip edge */
   set_period(az, 6000);
   found = 0;
-  for (int i = 0; i < 1000; i++)
+  for (int i = 0; i < 2000; i++)
   {
-    move_wait(az, 1);
-    if (az_triggered()) { found = 1; break; }
+    move_wait(az, -1);
+    if (!az_triggered()) { found = 1; break; }
   }
   if (!found) { uart_print("ERR no edge\r\n"); goto done; }
 
@@ -397,6 +414,7 @@ void home_azimuth(void)
 done:
   set_period(az, saved);
 }
+
 void axis_stop_all(void)
 {
 
