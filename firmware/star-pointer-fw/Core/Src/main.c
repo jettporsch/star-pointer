@@ -51,6 +51,8 @@ typedef struct {
 #define LASER_PORT GPIOA
 #define LASER_PIN  GPIO_PIN_9
 
+#define LASER_TIMEOUT_MS 60000
+
 #define ALT_ES_PORT GPIOA
 #define ALT_ES_PIN  GPIO_PIN_10
 
@@ -84,6 +86,8 @@ Axis axes[2];
 char line_buf[64];
 uint8_t line_len = 0;
 
+uint8_t laser_on = 0;
+uint32_t laser_on_tick = 0;
 
 /* USER CODE END PV */
 
@@ -164,6 +168,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+
+	  if (laser_on && HAL_GetTick() - laser_on_tick >= LASER_TIMEOUT_MS) {
+	    HAL_GPIO_WritePin(LASER_PORT, LASER_PIN, GPIO_PIN_RESET);
+	    laser_on = 0;
+	  }
 
 	  uint8_t c;
 	  if (HAL_UART_Receive(&huart2, &c, 1, 0) == HAL_OK) {
@@ -490,11 +499,14 @@ void handle_line(const char *line)
   else if (strcmp(line, "L 1") == 0)
   {
     HAL_GPIO_WritePin(LASER_PORT, LASER_PIN, GPIO_PIN_SET);
+    laser_on = 1;
+    laser_on_tick = HAL_GetTick();
     uart_print("OK\r\n");
   }
   else if (strcmp(line, "L 0") == 0)
   {
     HAL_GPIO_WritePin(LASER_PORT, LASER_PIN, GPIO_PIN_RESET);
+    laser_on = 0;
     uart_print("OK\r\n");
   }
 

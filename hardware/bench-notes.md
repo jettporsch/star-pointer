@@ -260,3 +260,13 @@ Dropped switch homing for az. It only locates the stage relative to the base, an
 Wired the laser through a 2N2222: D8 to a 330 ohm resistor to the base, emitter to GND, collector to the laser's black wire, laser red to 5V. Used 330 instead of the 1k planned earlier because green diodes can pull 100+mA and 1k only switches about 25mA cleanly. `L 1` turns it on at full brightness, same as wired straight to 5V. `L 0` turns it off, and `X` kills it.
 
 Next: laser auto-off timer, alt homing on connect in pointer.py, jog controls, two-star alignment.
+
+## 2026-10-06: Wall test and laser auto-off
+
+Unplugged both endstops. The firmware only reads them during H, H AZ, and E, and both pins have pull-ups, so unplugged they just read as not pressed.
+
+Wall test with the laser on the mount, about 114.5 inches (2.91m) from the wall. 100 steps on az moved the dot 144.6mm both directions. Expected 143mm, the difference is because I measured from the laser tip, which sits a few cm in front of the az axis. 100 steps on alt moved it 142.99mm both directions, matching the expected 143mm. After repeated back-and-forth moves on both axes, including direction reversals, the dot landed back on its marks within about half a mm, which is under 0.01 degrees. Step scale is correct on both axes and backlash is too small to measure. The 6 degree gap from the old az switch tests was switch hysteresis, not the belt.
+
+Added a laser auto-off: the laser turns off on its own 60 seconds after the last L 1. It turns off silently so the host doesn't read an unexpected line as the reply to its next command. Tested, it shuts off at about a minute.
+
+Next: jog controls in the web app, then two-star alignment.

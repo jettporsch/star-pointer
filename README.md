@@ -88,7 +88,7 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
    - [x] Azimuth zero (manual index mark; switch homing kept as a test tool)
    - [ ] Serial protocol spec (commands implemented, doc not written)
    - [x] Laser wiring and interlock
-- [ ] Laser auto-off timer
+- [x] Laser auto-off timer
    - [ ] Two-star alignment
    - [ ] End-to-end GOTO
    - [ ] Sidereal tracking
