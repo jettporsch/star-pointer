@@ -234,3 +234,17 @@ Fixed a bug where `move_wait` skipped moves if the axis was still busy from a pr
 Repeatability is about plus or minus 13 steps, roughly 0.38 degrees, over 6 homes from both sides. The error budget has 0.05 degrees for homing. Either the switch trip point is that loose because the cam ramp is shallow, or steps are getting lost somewhere. A fixed home offset gets absorbed by two-star alignment, so this only matters when re-homing without realigning.
 
 Next: laser on a wall about 3m away to see if the stage physically stops in the same spot each home. Same spot with scattered HOMED numbers means lost steps. Spot moving means the switch.
+
+## 2026-10-05: Half-turn az cam and fixed az motor plate
+
+Printed and installed the new az home cam. Same 18.5mm peak radius, raised section stretched to about half a turn, and the CW home ramp shortened from 65 to 20 degrees so the switch trips on a steeper part of the ramp. The other ramp stays at 65 degrees. The lever rides it smoothly in both directions by hand.
+
+Replaced the slotted az motor plate with one that has round holes instead of slots, reusing both rails. That puts the motor shaft at a fixed 72.8mm from the center shaft: 72.5mm nominal for a GT2-250 belt on 20T and 80T pulleys, plus 0.3mm for tension. The V-notch on the plate faces away from the center shaft. Belt is snug.
+
+Cleaned up some of the wiring.
+
+Added the current full assembly STEP and the two new print files to `hardware/cad/`.
+
+Expected: the new ramp is about 3x steeper where the switch trips, so if the homing scatter is coming from the switch, the ±0.38 degrees should drop to around ±0.12 and the 6 degree direction gap to about 2. Not tested yet.
+
+Next: power up, measure the new switch window, rerun homing repeatability, then the laser wall test.
