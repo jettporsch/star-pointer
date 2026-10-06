@@ -78,6 +78,28 @@ def jog():
     return jsonify(ok=True)
 
 
+@app.post("/api/align")
+def align():
+    if pointer is None:
+        return jsonify(error="mount not connected"), 503
+    name = request.json.get("name", "")
+    try:
+        with lock:
+            if any(pointer.m.status()[1]):
+                return jsonify(error="wait for the mount to stop first"), 409
+            report = pointer.record_star(name)
+    except (ValueError, KeyError) as e:
+        return jsonify(error=str(e).strip("'\""), report=pointer.align.report), 400
+    return jsonify(ok=True, report=report)
+
+
+@app.post("/api/align/reset")
+def align_reset():
+    if pointer is not None:
+        pointer.align.reset()
+    return jsonify(ok=True)
+
+
 @app.post("/api/laser")
 def laser():
     global laser_wanted, last_arm
@@ -103,7 +125,8 @@ def where():
         alt, az = pointer.where()
         _, busy = pointer.m.status()
     return jsonify(connected=True, alt=alt, az=az, busy=any(busy),
-                   laser=laser_wanted)
+                   laser=laser_wanted, align=pointer.align.report,
+                   nstars=len(pointer.align.stars))
 
 
 @app.post("/api/stop")
@@ -138,6 +161,9 @@ button:disabled { color:#522; border-color:#300; }
 .row { display:flex; gap:8px; margin-top:8px; }
 .row button { font-size:15px; padding:12px 0; }
 .row button.on { background:#400; color:#f66; border-color:#a33; }
+select { background:#150000; color:#e44; border:1px solid #522; border-radius:8px;
+         padding:12px; font-size:16px; width:100%; margin:4px 0; }
+#alignstat { color:#a44; min-height:1.3em; font-size:14px; }
 </style></head>
 <body>
 <h1>Star Pointer</h1>
@@ -160,6 +186,12 @@ button:disabled { color:#522; border-color:#300; }
   <button data-deg="0.03">fine</button>
 </div>
 <div class="row"><button id="laser" onclick="toggleLaser()">laser off</button></div>
+
+<h2>Align</h2>
+<div id="alignstat">not aligned</div>
+<select id="alignstar"></select>
+<button onclick="recordStar()" style="justify-content:center">Beam is on this star</button>
+<button onclick="resetAlign()" style="justify-content:center">Reset alignment</button>
 
 <h2>Stars</h2>
 <div id="list"></div>
@@ -199,6 +231,11 @@ async function toggleLaser() {
 
 async function loadStars() {
   const stars = await (await fetch('/api/stars')).json();
+  const keep = $('alignstar').value;
+  $('alignstar').innerHTML = stars.filter(s => s.up).map(s =>
+    `<option value="${s.name}">${s.name} (alt ${s.alt}&deg; az ${s.az}&deg;)</option>`
+  ).join('');
+  if (keep) $('alignstar').value = keep;
   $('list').innerHTML = '';
   for (const s of stars) {
     const b = document.createElement('button');
@@ -216,6 +253,17 @@ async function pointAt(name) {
   if (j.error) $('msg').textContent = j.error;
 }
 
+async function recordStar() {
+  const name = $('alignstar').value;
+  const j = await post('/api/align', { name });
+  $('msg').textContent = j.error || `recorded ${name}`;
+}
+
+async function resetAlign() {
+  await post('/api/align/reset');
+  $('msg').textContent = 'alignment cleared';
+}
+
 async function stopMount() {
   await post('/api/stop');
   laserOn = false; showLaser();
@@ -230,6 +278,7 @@ async function poll() {
     $('stat').textContent = `${j.busy ? 'moving' : 'at'} alt ${
       j.alt.toFixed(2)}° az ${az.toFixed(2)}°`;
     if (j.laser !== laserOn) { laserOn = j.laser; showLaser(); }
+    $('alignstat').textContent = j.align;
   } catch (e) { $('stat').textContent = 'server offline'; }
 }
 
@@ -242,4 +291,12 @@ poll(); setInterval(poll, 500);
 if __name__ == "__main__":
     # 0.0.0.0 lets your phone connect on the same wifi.
     # Port 8000 because macOS uses 5000 for AirPlay.
-    app.run(host="0.0.0.0", port=8000, threaded=True)
+    try:
+        app.run(host="0.0.0.0", port=8000, threaded=True)
+    finally:
+        # Ctrl-C: kill the beam right away instead of waiting for auto-off
+        if pointer is not None:
+            try:
+                pointer.m.send("L 0")
+            except Exception:
+                pass

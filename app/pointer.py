@@ -1,13 +1,14 @@
 from datetime import datetime, timezone
 
+from app.align import Alignment
 from app.mount import Mount
 from app.skycoords import Observer, look_up
 
 # 200 steps/rev x 16 microsteps x 4:1 belt, per degree of output
 STEPS_PER_DEG = 200 * 16 * 4 / 360
 
-# Which motor drives which axis, and direction. Set these once the
-# mount is built: flip a sign to -1 if that axis moves backwards.
+# Which motor drives which axis, and direction. Checked on the bench:
+# +alt moves the beam up, +az turns the stage CW from above.
 ALT_AXIS, AZ_AXIS = 1, 2
 ALT_SIGN, AZ_SIGN = 1, 1
 
@@ -19,11 +20,12 @@ WYLIE = Observer(latitude_deg=33.0151, longitude_deg=-96.5389, name="Wylie, TX")
 class Pointer:
     def __init__(self, mount):
         self.m = mount
-        # For now, wherever the motors are at connect is alt 0, az 0,
-        # and the mount must be level and facing true north.
-        # Endstop homing and calibration replace this later.
+        # Raw zero is wherever the motors are at connect: stage on the pencil
+        # mark, laser resting roughly flat. Two-star alignment works out how
+        # that relates to the sky.
         pos, _ = self.m.status()
         self.home = pos
+        self.align = Alignment()
 
     def _steps(self):
         pos, _ = self.m.status()
@@ -31,19 +33,23 @@ class Pointer:
         az = pos[AZ_AXIS - 1] - self.home[AZ_AXIS - 1]
         return alt, az
 
-    def where(self):
+    def where_raw(self):
+        """Mount angles from step counts, relative to the power-on position."""
         alt, az = self._steps()
         return (alt * ALT_SIGN / STEPS_PER_DEG,
                 az * AZ_SIGN / STEPS_PER_DEG)
 
-    def goto(self, alt, az, wait=True):
-        if not ALT_MIN <= alt <= ALT_MAX:
-            raise ValueError(f"altitude {alt} outside {ALT_MIN} to {ALT_MAX}")
-        # keep azimuth in -180 to +180 so cables never wrap past the seam
-        az = (az + 180) % 360 - 180
+    def where(self):
+        """Where in the sky the beam is pointing, using the current alignment."""
+        return self.align.to_sky(*self.where_raw())
 
-        target_alt = round(alt * STEPS_PER_DEG) * ALT_SIGN
-        target_az = round(az * STEPS_PER_DEG) * AZ_SIGN
+    def goto_raw(self, raw_alt, raw_az, wait=True):
+        # keep raw azimuth within half a turn of the pencil mark so the
+        # cables never wind past their slack
+        raw_az = (raw_az + 180) % 360 - 180
+
+        target_alt = round(raw_alt * STEPS_PER_DEG) * ALT_SIGN
+        target_az = round(raw_az * STEPS_PER_DEG) * AZ_SIGN
         cur_alt, cur_az = self._steps()
 
         # both axes start together, firmware runs them at the same time
@@ -51,6 +57,22 @@ class Pointer:
         self.m.move(AZ_AXIS, target_az - cur_az)
         if wait:
             self.m.wait()
+
+    def goto(self, alt, az, wait=True):
+        """Point at a sky altitude/azimuth, corrected by the alignment."""
+        if not ALT_MIN <= alt <= ALT_MAX:
+            raise ValueError(f"altitude {alt} outside {ALT_MIN} to {ALT_MAX}")
+        self.goto_raw(*self.align.to_mount(alt, az), wait=wait)
+
+    def record_star(self, name, observer=WYLIE, when=None):
+        """Call with the beam centered on `name`. Returns the alignment report."""
+        when = when or datetime.now(timezone.utc)
+        target = look_up(name, observer, when)
+        if not target.visible:
+            raise ValueError(f"{name} is below the horizon")
+        raw_alt, raw_az = self.where_raw()
+        return self.align.add(name, target.altitude_deg, target.azimuth_deg,
+                              raw_alt, raw_az)
 
     def point_at(self, name, observer=WYLIE, when=None):
         when = when or datetime.now(timezone.utc)
