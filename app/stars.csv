@@ -1,0 +1,83 @@
+name,ra_deg,dec_deg,mag,constellation
+Sirius,101.28715,-16.71612,-1.44,Canis Major
+Arcturus,213.91530,19.18241,-0.05,Bootes
+Vega,279.23474,38.78369,0.03,Lyra
+Capella,79.17233,45.99799,0.08,Auriga
+Rigel,78.63447,-8.20164,0.18,Orion
+Procyon,114.82549,5.22499,0.40,Canis Minor
+Betelgeuse,88.79294,7.40706,0.45,Orion
+Altair,297.69583,8.86832,0.76,Aquila
+Aldebaran,68.98016,16.50930,0.87,Taurus
+Spica,201.29825,-11.16132,0.98,Virgo
+Antares,247.35192,-26.43200,1.06,Scorpius
+Pollux,116.32896,28.02620,1.16,Gemini
+Fomalhaut,344.41269,-29.62224,1.17,Piscis Austrinus
+Deneb,310.35798,45.28034,1.25,Cygnus
+Regulus,152.09296,11.96721,1.36,Leo
+Adhara,104.65645,-28.97208,1.50,Canis Major
+Castor,113.64943,31.88828,1.58,Gemini
+Shaula,263.40217,-37.10382,1.62,Scorpius
+Bellatrix,81.28276,6.34970,1.64,Orion
+Elnath,81.57297,28.60745,1.65,Taurus
+Alnilam,84.05339,-1.20192,1.69,Orion
+Alnitak,85.18970,-1.94257,1.74,Orion
+Alioth,193.50729,55.95982,1.76,Ursa Major
+Kaus Australis,276.04299,-34.38462,1.79,Sagittarius
+Mirfak,51.08071,49.86118,1.79,Perseus
+Dubhe,165.93195,61.75103,1.81,Ursa Major
+Wezen,107.09785,-26.39320,1.83,Canis Major
+Alkaid,206.88516,49.31327,1.85,Ursa Major
+Menkalinan,89.88218,44.94743,1.90,Auriga
+Alhena,99.42792,16.39925,1.93,Gemini
+Polaris,37.95452,89.26411,1.97,Ursa Minor
+Mirzam,95.67494,-17.95592,1.98,Canis Major
+Alphard,141.89685,-8.65860,1.99,Hydra
+Algieba,154.99314,19.84149,2.01,Leo
+Hamal,31.79336,23.46242,2.01,Aries
+Diphda,10.89738,-17.98660,2.04,Cetus
+Nunki,283.81636,-26.29672,2.05,Sagittarius
+Menkent,211.67062,-36.36995,2.06,Centaurus
+Alpheratz,2.09691,29.09043,2.07,Andromeda
+Kochab,222.67636,74.15550,2.07,Ursa Minor
+Mirach,17.43302,35.62056,2.07,Andromeda
+Saiph,86.93912,-9.66960,2.07,Orion
+Rasalhague,263.73363,12.56003,2.08,Ophiuchus
+Algol,47.04221,40.95565,2.09,Perseus
+Almach,30.97480,42.32972,2.10,Andromeda
+Denebola,177.26491,14.57206,2.14,Leo
+Naos,120.89603,-40.00315,2.21,Puppis
+Alphecca,233.67195,26.71469,2.22,Corona Borealis
+Mizar,200.98143,54.92536,2.23,Ursa Major
+Sadr,305.55709,40.25668,2.23,Cygnus
+Eltanin,269.15154,51.48889,2.24,Draco
+Schedar,10.12684,56.53733,2.24,Cassiopeia
+Mintaka,83.00167,-0.29909,2.25,Orion
+Caph,2.29452,59.14978,2.28,Cassiopeia
+Merak,165.46032,56.38243,2.34,Ursa Major
+Izar,221.24674,27.07422,2.35,Bootes
+Enif,326.04649,9.87501,2.38,Pegasus
+Phecda,178.45770,53.69476,2.41,Ursa Major
+Sabik,257.59453,-15.72491,2.43,Ophiuchus
+Scheat,345.94357,28.08279,2.44,Pegasus
+Alderamin,319.64488,62.58557,2.45,Cepheus
+Markab,346.19022,15.20526,2.49,Pegasus
+Menkar,45.56988,4.08973,2.54,Cetus
+Arneb,83.18257,-17.82229,2.58,Lepus
+Gienah,183.95154,-17.54193,2.58,Corvus
+Unukalhai,236.06698,6.42563,2.63,Serpens Caput
+Tarazed,296.56491,10.61326,2.72,Aquila
+Zubenelgenubi,222.71964,-16.04178,2.75,Libra
+Cebalrai,265.86814,4.56730,2.76,Ophiuchus
+Rasalgethi,258.66191,14.39033,2.78,Hercules
+Nihal,82.06135,-20.75944,2.81,Lepus
+Algenib,3.30897,15.18360,2.83,Pegasus
+Alcyone,56.87115,24.10514,2.85,Taurus
+Vindemiatrix,195.54415,10.95915,2.85,Virgo
+Acamar,44.56531,-40.30467,2.88,Eridanus
+Sadalmelik,331.44598,-0.31985,2.95,Aquarius
+Zaurak,59.50736,-13.50852,2.97,Eridanus
+Minkar,182.53117,-22.61977,3.02,Corvus
+Albireo,292.68034,27.95968,3.05,Cygnus
+Alfirk,322.16499,70.56072,3.23,Cepheus
+Sulafat,284.73593,32.68956,3.25,Lyra
+Megrez,183.85650,57.03262,3.32,Ursa Major

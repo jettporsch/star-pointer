@@ -120,7 +120,7 @@ library. If a check fails, its name points at the specific thing that broke.
 Comparing to a reference implementation would only tell me the two disagree,
 not where or which one is wrong.
 
-13 checks, all passing.
+14 checks, all passing.
 
 ## References
 

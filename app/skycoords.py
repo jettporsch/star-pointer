@@ -258,36 +258,22 @@ def radec_to_altaz(
 
 
 # ---------------------------------------------------------------------------
-# 22 bright stars with J2000 coordinates, including all seven Big Dipper
-# stars. Hardcoded because 22 entries does not justify a file format.
+# Star catalog: every star brighter than magnitude 3.5 that climbs at least
+# 15 deg above the horizon from North Texas, from the Hipparcos-based list
+# bundled with PyEphem (J2000). Cluster members a laser can't tell apart
+# (Pleiades, Alcor) are left out. Lives in stars.csv next to this file.
 # ---------------------------------------------------------------------------
 
-CATALOG: dict[str, tuple[float, float]] = {
-    # name:            (RA deg,   Dec deg)
-    "Polaris":         (37.95456,  89.26411),
-    "Vega":            (279.23473, 38.78369),
-    "Sirius":          (101.28716, -16.71612),
-    "Arcturus":        (213.91530, 19.18241),
-    "Capella":         (79.17233,  45.99799),
-    "Rigel":           (78.63447, -8.20164),
-    "Procyon":         (114.82550, 5.22499),
-    "Betelgeuse":      (88.79294,  7.40706),
-    "Altair":          (297.69582, 8.86832),
-    "Aldebaran":       (68.98016,  16.50930),
-    "Antares":         (247.35191, -26.43200),
-    "Spica":           (201.29825, -11.16132),
-    "Pollux":          (116.32896, 28.02620),
-    "Deneb":           (310.35798, 45.28034),
-    "Regulus":         (152.09296, 11.96721),
-    # Big Dipper, west to east
-    "Dubhe":           (165.93196, 61.75103),
-    "Merak":           (165.46032, 56.38243),
-    "Phecda":          (178.45771, 53.69476),
-    "Megrez":          (183.85650, 57.03262),
-    "Alioth":          (193.50729, 55.95982),
-    "Mizar":           (200.98142, 54.92536),
-    "Alkaid":          (206.88516, 49.31327),
-}
+import csv as _csv
+from pathlib import Path as _Path
+
+CATALOG: dict[str, tuple[float, float]] = {}       # name -> (RA deg, Dec deg)
+STAR_INFO: dict[str, tuple[float, str]] = {}       # name -> (magnitude, constellation)
+
+with open(_Path(__file__).with_name("stars.csv"), newline="") as _f:
+    for _row in _csv.DictReader(_f):
+        CATALOG[_row["name"]] = (float(_row["ra_deg"]), float(_row["dec_deg"]))
+        STAR_INFO[_row["name"]] = (float(_row["mag"]), _row["constellation"])
 
 
 def look_up(name: str, observer: Observer, when_utc: datetime) -> Target:
@@ -295,8 +281,8 @@ def look_up(name: str, observer: Observer, when_utc: datetime) -> Target:
     Convenience wrapper. Takes a name like "Vega", looks the coordinates up in
     the catalog dict, and calls the transform.
     """
-    key = name.strip().title()
-    if key not in CATALOG:
+    key = {n.lower(): n for n in CATALOG}.get(name.strip().lower())
+    if key is None:
         raise KeyError(f"{name!r} not in catalog. Known: {', '.join(sorted(CATALOG))}")
     ra, dec = CATALOG[key]
     return radec_to_altaz(ra, dec, observer, when_utc)

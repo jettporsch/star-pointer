@@ -11,7 +11,7 @@ from app.align import pair_sensitivity
 from app.mount import Mount
 from app.pointer import (Pointer, WYLIE, STEPS_PER_DEG,
                          ALT_AXIS, AZ_AXIS, ALT_SIGN, AZ_SIGN)
-from app.skycoords import CATALOG, look_up
+from app.skycoords import CATALOG, STAR_INFO, look_up
 
 app = Flask(__name__)
 lock = Lock()  # one serial conversation at a time
@@ -66,8 +66,10 @@ def stars():
     out = []
     for name in CATALOG:
         t = look_up(name, WYLIE, now)
+        mag, con = STAR_INFO[name]
         s = {"name": name, "alt": round(t.altitude_deg, 1),
-             "az": round(t.azimuth_deg, 1), "up": t.visible, "pair": None}
+             "az": round(t.azimuth_deg, 1), "up": t.visible, "pair": None,
+             "mag": mag, "con": con}
         if first is not None and t.visible and name != name1:
             s["pair"] = pair_sensitivity(first, (t.altitude_deg, t.azimuth_deg))
         out.append(s)
@@ -265,7 +267,7 @@ select { background:#150000; color:#e44; border:1px solid #522; border-radius:8p
 <button id="centered" onclick="markCentered()" style="justify-content:center">Centered</button>
 <div id="acclist"></div>
 
-<h2>Stars</h2>
+<h2>Stars <small id="nstars" style="font-weight:normal"></small></h2>
 <div id="list"></div>
 <script>
 const $ = id => document.getElementById(id);
@@ -317,12 +319,15 @@ async function loadStars() {
   ).join('');
   if (keep) $('alignstar').value = keep;
   alignRated = rated;
+  // Only stars that are up, highest first. Brighter stars (lower magnitude)
+  // are easier to find by eye; under 2 is easy from a suburb.
   $('list').innerHTML = '';
-  for (const s of stars) {
+  const up = stars.filter(s => s.up);
+  $('nstars').textContent = `${up.length} up now`;
+  for (const s of up) {
     const b = document.createElement('button');
-    b.disabled = !s.up;
-    b.innerHTML = `<span>${s.name}</span><span>${
-      s.up ? `alt ${s.alt}&deg; az ${s.az}&deg;` : 'below horizon'}</span>`;
+    b.innerHTML = `<span>${s.name} <small style="color:#844">${s.con}, mag ${
+      s.mag.toFixed(1)}</small></span><span>alt ${s.alt}&deg; az ${s.az}&deg;</span>`;
     b.onclick = () => pointAt(s.name);
     $('list').appendChild(b);
   }

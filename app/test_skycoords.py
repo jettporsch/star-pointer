@@ -156,21 +156,31 @@ check("Mizar-Alkaid separation is rotation-invariant", spread < 0.01,
 
 print("\n--- Corrections ---")
 
-# This one is not checking correctness. It runs every catalog star twice, once
-# with precession applied and once without, and measures how far apart the two
-# answers land.
+# Every catalog star runs twice, with and without precession. Precession turns
+# the sky about the ecliptic pole at 50.29"/yr, so each star should shift by
+# that rate x years since J2000 x cos(ecliptic latitude). Stars near the
+# ecliptic move about 0.37 deg by 2026; stars near the ecliptic pole in Draco
+# barely move. The check compares every star's shift to that rule.
 #
-# It confirms the correction is worth applying. Against my +/-0.5 deg budget
-# the shift is most of it, so the correction stays.
+# It also confirms the correction is worth applying: the biggest shift is most
+# of my +/-0.5 deg budget.
 t_now = datetime(2026, 9, 9, 4, 0, 0, tzinfo=timezone.utc)
-shifts = []
+years = (julian_date(t_now) - 2451545.0) / 365.25
+eps = math.radians(23.4393)
+worst_miss, biggest = 0.0, 0.0
 for ra, dec in CATALOG.values():
     a = radec_to_altaz(ra, dec, WYLIE, t_now, apply_precession=True, apply_refraction=False)
     b = radec_to_altaz(ra, dec, WYLIE, t_now, apply_precession=False, apply_refraction=False)
-    shifts.append(angular_sep(a.altitude_deg, a.azimuth_deg, b.altitude_deg, b.azimuth_deg))
-check("precession matters at the 0.1-0.5 deg level",
-      0.10 < min(shifts) and 0.25 < max(shifts) < 0.50,
-      f"min {min(shifts):.3f}, max {max(shifts):.3f} deg")
+    shift = angular_sep(a.altitude_deg, a.azimuth_deg, b.altitude_deg, b.azimuth_deg)
+    r, d = math.radians(ra), math.radians(dec)
+    beta = math.asin(math.sin(d) * math.cos(eps) - math.cos(d) * math.sin(eps) * math.sin(r))
+    expected = 50.29 / 3600 * years * math.cos(beta)
+    worst_miss = max(worst_miss, abs(shift - expected))
+    biggest = max(biggest, shift)
+check("precession shift matches 50.29\"/yr x cos(ecliptic latitude)",
+      worst_miss < 0.005, f"worst miss {worst_miss:.4f} deg over {len(CATALOG)} stars")
+check("precession matters at the 0.1-0.5 deg level", 0.25 < biggest < 0.50,
+      f"biggest shift {biggest:.3f} deg")
 
 check("refraction near horizon is ~0.5 deg", 0.4 < refraction_degrees(0.0) < 0.6,
       f"{refraction_degrees(0.0):.3f} deg")
