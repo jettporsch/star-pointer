@@ -4,7 +4,9 @@ A two-axis motorized mount that points a laser at any star you pick on your
 laptop. It works out where to aim from your location, the current time, and a
 two-star alignment done at setup.
 
-**Status:** in development. Coordinate math is working. Firmware drives both axes over USB serial with endstop homing on both axes. Next up is laser wiring and two-star alignment.
+**Status:** working prototype. After a two-star alignment it points the laser 
+at a selected star, controlled from a phone or laptop. Next up is measuring 
+accuracy across the sky and a cleaner v2 mount.
 
 **Design target:** ±0.5° pointing accuracy.
 
@@ -24,17 +26,17 @@ Pulse generation has to be on the STM32 for microsecond timing and instant
 limit switch response. The astronomy has to be on the laptop, because that's
 where the catalog and the UI live.
 
-I decided to put mount position and step conversion on the STM32 as well. If
-the laptop kept its own copy, a missed step or a restarted app would make the
-two disagree with nothing to catch it. This way the laptop never needs to know
-about steps, gear ratios, or microstepping. All it does is name a direction.
+Step conversion lives in Python for now. Two-star alignment needs the same 
+math anyway, and prototyping it in Python was faster to debug. The firmware 
+stays simple: it takes step moves, reports position, and handles the laser 
+and stop. Porting the conversion to the STM32 is a possible later step.
 
 That comes with a cost: more C, and firmware debugging is slower than Python.
 I'm mitigating that by prototyping the alignment math in Python first, then
 porting it to C with known-good numbers to check against.
 
-The interface between the two sides is an alt/az pair over USB serial. That's
-the whole contract.
+The interface between the two sides is a small text command set over USB 
+serial: move, status, stop, and laser.
 
 ```
   Laptop (Python)                    STM32                   Mechanics
@@ -88,8 +90,10 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
    - [x] Azimuth zero (manual index mark; switch homing kept as a test tool)
    - [ ] Serial protocol spec (commands implemented, doc not written)
    - [x] Laser wiring and interlock
-- [x] Laser auto-off timer
+   - [x] Laser auto-off timer
    - [x] Two-star alignment
    - [x] End-to-end GOTO
+   - [ ] Accuracy measurement across the sky
+   - [ ] v2 mount: smaller frame, cable routing, electronics enclosure
    - [ ] Sidereal tracking
    - [ ] Custom PCB
