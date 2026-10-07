@@ -67,7 +67,7 @@ problem is that it would sit inches from two stepper motors and a steel frame,
 so my own hardware corrupts the reading and no correction fixes that.
 
 With two-star alignment I manually slew to two stars I can identify, confirm
-each one, and the firmware records the motor positions. From those two
+each one, and the app records the motor positions. From those two
 observations it solves for how the mount is actually oriented. One procedure
 handles heading and leveling at once, so a tripod that's 1° out of level gets
 absorbed instead of costing me up to 1° of pointing error.
@@ -83,8 +83,8 @@ identify two stars.
 
 **Why:** the DRV8825 is pin-compatible with the A4988 but handles more current
 with finer microstepping, at the same price. The TMC2209 is nicer on paper,
-mainly for sensorless homing, but that is unreliable on a low-torque belt axis
-and I'm using limit switches anyway.
+mainly for sensorless homing, but that is unreliable on a low-torque belt axis,
+and homing turned out to be unnecessary anyway (see D7).
 
 ## D6. Mount position and step conversion live on the STM32
 
@@ -103,6 +103,36 @@ pair could drive the mount.
 The cost is more C, and firmware debugging is slower than Python. I'm
 mitigating that by prototyping the alignment math in Python first, then porting
 it to C with known-good numbers to check against.
+
+**Revised, Oct 2026:** step conversion and alignment ended up in Python, and
+the firmware only takes step moves. Once alignment was written in Python, it
+already had to do the angle math, and splitting it across two languages bought
+nothing. The missed-step concern above is real but didn't show up: the wall
+test came back within 0.01° after repeated moves, and the one real failure on
+the sky (a slipping pulley) was mechanical, so neither side's count would have
+caught it. Porting to C is still an option, not a requirement.
+
+## D7. No limit switch homing
+
+**Chose:** start with the stage on a pencil mark and the laser roughly flat,
+then let two-star alignment work out the rest.
+
+**Rejected:** endstop homing on both axes.
+
+**Why:** two-star alignment solves for where az zero points, how far off level
+the base is, and how far off flat the laser started, every session. Homing only
+told the mount where it was relative to its own base, which alignment throws
+away anyway. The only real job left was keeping the cables from winding past
+their slack, and an index mark does that.
+
+I built and tested switch homing first. Altitude worked. Azimuth took days of
+cam reprints and still scattered about ±0.4°, and most of the 6° hysteresis I
+measured turned out to be the switch itself, not the drive. That effort was the
+signal to step back and ask what homing was actually for.
+
+**Cost:** two rules at startup (stage on the mark, laser roughly flat, 12V on
+before the app). A slot that locks the turntable with a coin is on the v2 list
+to make the az mark more precise.
 
 ## Template
 

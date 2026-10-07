@@ -35,11 +35,11 @@ runs on: go after the biggest term, ignore anything under about 0.05°.
 | # | Source | Estimate | Measured | Notes |
 |---|---|---|---|---|
 | 1 | Microstep positional error | 0.07° | tbd | ±0.2 full step at motor, divided by 4 at the belt |
-| 2 | Belt backlash and compliance | 0.15° | tbd | Estimate |
+| 2 | Belt backlash and compliance | 0.15° | <0.01° | Wall test at 2.9 m, repeated moves with reversals |
 | 3 | Frame and printed-part flex | 0.15° | tbd | Estimate, worst at high altitude |
-| 4 | Two-star alignment residual | 0.25° | tbd | Estimate, limited by how precisely I can eyeball the stars |
+| 4 | Two-star alignment residual | 0.25° | tbd | First sky test: GOTO landed on Deneb and Polaris by eye, not yet measured in degrees |
 | 5 | Laser collimation offset | 0.15° | tbd | Estimate, beam axis vs altitude axis |
-| 6 | Homing repeatability | 0.05° | tbd | Limit switch trigger point, divided by 4 at the belt |
+| 6 | Homing repeatability | 0.05° | n/a | Switch homing dropped (decision D7); alignment absorbs the start position |
 | 7 | Coordinate math residual | 0.02° | 0.01° | Measured by the test suite |
 | 8 | Clock error | 0.01° | n/a | Sky moves 0.25°/min, so 1 s of clock error is 0.004° |
 | 9 | Observer position error | <0.01° | n/a | 0.001° of latitude is about 100 m |
