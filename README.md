@@ -89,7 +89,7 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
    - [ ] Serial protocol spec (commands implemented, doc not written)
    - [x] Laser wiring and interlock
 - [x] Laser auto-off timer
-   - [ ] Two-star alignment
-   - [ ] End-to-end GOTO
+   - [x] Two-star alignment
+   - [x] End-to-end GOTO
    - [ ] Sidereal tracking
    - [ ] Custom PCB

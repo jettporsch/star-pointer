@@ -270,3 +270,15 @@ Wall test with the laser on the mount, about 114.5 inches (2.91m) from the wall.
 Added a laser auto-off: the laser turns off on its own 60 seconds after the last L 1. It turns off silently so the host doesn't read an unexpected line as the reply to its next command. Tested, it shuts off at about a minute.
 
 Next: jog controls in the web app, then two-star alignment.
+
+## 2026-10-06: First on-sky GOTO
+
+Tested in the driveway, which slopes about 4 degrees. Startup: stage facing roughly south, laser laid flat, 12V on, then the web app.
+
+First attempt failed because the laser wasn't flat at startup (alt zero came out 47 degrees off, outside the solver's search range), and the az stage could be turned by hand while the motor was holding. The 80T pulley wasn't gripping the center shaft. A long az slew fell short, and every move after that carried the error forward. The app was commanding the right moves, the stage just didn't follow. The earlier wall test only used short moves, so it didn't catch this. Tightened it.
+
+Second attempt: aligned on Altair and Vega, sighting straight down the beam from behind the laser. Alignment reported the base about 3 degrees off level and alt zero within 0.1 degrees, both matching the real setup. GOTO to Deneb, Polaris, and back to Vega all landed on the star with no jog correction needed.
+
+Lessons: 12V on before starting the app so the laser can't swing, sight down the beam when centering, and face south at startup so the cable limit sits due north where few stars cross.
+
+Next: big round-trip az test indoors to confirm the pulley stays tight, then measure accuracy across more stars.
