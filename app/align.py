@@ -130,9 +130,13 @@ class Alignment:
         def mismatch(e):
             return separation(vec(ra1 + e, rz1), vec(ra2 + e, rz2)) - sky_sep
 
-        # scan alt index from -30 to +30 deg, refine every sign change by
-        # bisection, keep the root closest to zero (the laser started near flat)
-        grid = [i / 10 for i in range(-300, 301)]
+        # Each star on its own gives a guess for alt index (sky alt minus raw
+        # alt), off only by however much the base is tilted. So the true value
+        # is near their average no matter how the laser was resting at power-on.
+        # Scan 20 deg either side of that guess, refine every sign change by
+        # bisection, and keep the root closest to the guess.
+        guess = ((sa1 - ra1) + (sa2 - ra2)) / 2
+        grid = [guess + i / 10 for i in range(-200, 201)]
         vals = [mismatch(e) for e in grid]
         roots = []
         for i in range(len(grid) - 1):
@@ -146,7 +150,7 @@ class Alignment:
                         lo = mid
                 roots.append((lo + hi) / 2)
         if roots:
-            e = min(roots, key=abs)
+            e = min(roots, key=lambda r: abs(r - guess))
             residual = 0.0
         else:
             # measurement noise can leave a near-miss with no exact root
@@ -180,6 +184,36 @@ class Alignment:
         return angles(mat_vec(transpose(self.R), vec(raw_alt + self.alt_index, raw_az)))
 
 
+# ---- choosing a good second star ------------------------------------------
+
+_SKY_GRID = [(alt, az) for alt in (25, 45, 65, 80) for az in range(0, 360, 30)]
+
+
+def pair_sensitivity(first, second, slip=0.1):
+    """How badly a centering slip on `second` throws off GOTOs elsewhere.
+
+    `first` and `second` are sky (alt, az). Simulates a perfectly set up mount,
+    aligns on both stars with `second` centered `slip` degrees off in each of
+    four directions, and returns the worst GOTO error across the sky. Some pairs
+    turn a 0.1 deg slip into 0.1 deg of error; others turn it into several
+    degrees, mostly because the stars give the solver little to work with.
+    Returns None if the pair is too close together to align on at all.
+    """
+    if separation(vec(*first), vec(*second)) < 30:
+        return None
+    worst = 0.0
+    for d_alt, d_az in ((slip, 0), (-slip, 0), (0, slip), (0, -slip)):
+        a = Alignment()
+        a.add("first", *first, *first)
+        try:
+            a.add("second", *second, second[0] + d_alt, second[1] + d_az)
+        except ValueError:
+            return None
+        for alt, az in _SKY_GRID:
+            worst = max(worst, separation(vec(*a.to_mount(alt, az)), vec(alt, az)))
+    return worst
+
+
 # ---- desk test ------------------------------------------------------------
 
 def _self_test():
@@ -187,7 +221,7 @@ def _self_test():
     import random
     random.seed(1)
 
-    tilt_axis, tilt, az_offset, alt_index = 40.0, 3.0, 137.0, -2.5
+    tilt_axis, tilt, az_offset = 40.0, 3.0, 137.0
 
     # true sky -> mount: tilt the base, then spin the az zero
     c, s = math.cos(math.radians(tilt)), math.sin(math.radians(tilt))
@@ -195,24 +229,25 @@ def _self_test():
     true_R = mat_mul(rot_z(-az_offset),
                      mat_mul(rot_z(tilt_axis), mat_mul(tilt_x, rot_z(-tilt_axis))))
 
-    def reading(sky_alt, sky_az, noise=0.0):
+    def reading(sky_alt, sky_az, alt_index, noise=0.0):
         m_alt, m_az = angles(mat_vec(true_R, vec(sky_alt, sky_az)))
         return (m_alt - alt_index + random.gauss(0, noise),
                 m_az + random.gauss(0, noise))
 
     stars = {"Vega": (62.0, 290.0), "Arcturus": (25.0, 255.0), "Altair": (55.0, 170.0)}
 
-    for noise in (0.0, 0.05):
+    cases = [(0.0, -2.5), (0.05, -2.5), (0.05, 47.0)]
+    for noise, alt_index in cases:
         a = Alignment()
         for name in ("Vega", "Altair"):
-            a.add(name, *stars[name], *reading(*stars[name], noise))
-        want = reading(*stars["Arcturus"])
+            a.add(name, *stars[name], *reading(*stars[name], alt_index, noise))
+        want = reading(*stars["Arcturus"], alt_index)
         got = a.to_mount(*stars["Arcturus"])
         err = separation(vec(*want), vec(*got))
-        print(f"noise {noise:.2f} deg: {a.report}")
+        print(f"noise {noise:.2f} deg, laser started {alt_index:+.1f} deg: {a.report}")
         print(f"   Arcturus pointing error {err:.4f} deg "
               f"({'PASS' if err < 0.5 else 'FAIL'}, target 0.5)")
-    print(f"truth: base off level {tilt:.2f} deg, alt zero off by {alt_index:+.2f} deg")
+    print(f"truth: base off level {tilt:.2f} deg, alt zero off by the 'laser started' value")
 
 
 if __name__ == "__main__":

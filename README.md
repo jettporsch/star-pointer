@@ -78,13 +78,24 @@ it at the laptop's IP address on port 8000.
 
 ## Using it outside
 
-1. Stage facing roughly south, laser laid roughly flat. Facing south puts the
-   cable limit (half a turn either way) due north, where few stars cross.
+1. Stage facing roughly south. That puts the cable limit (half a turn either
+   way) due north, where few stars cross. The laser can rest at any angle.
 2. 12V on first, so the motors lock the mount in place, then start the web app.
 3. Jog the beam onto a bright star, sighting straight down the beam from behind
    the laser, pick it in the Align list, and tap "Beam is on this star."
-4. Repeat on a second star at least 30° away.
+4. The Align list now ranks every other star as a partner for the first one.
+   Pick one rated "good" and do the same.
 5. Tap any star in the list to point at it.
+
+Choosing the second star matters more than it looks. With the same 0.1°
+centering slip, a good pair keeps every GOTO within about 0.1°, while a poor
+one can throw some off by several degrees. The app simulates each pair and
+rates it, so there's nothing to memorize.
+
+**Measuring accuracy:** after a GOTO, jog the beam onto the star and tap
+"Centered." The app logs how far the GOTO landed from the star, and in which
+direction, to `data/accuracy.csv`, and shows the RMS and worst miss for the
+current alignment. Alignment stars are logged but left out of the stats.
 
 Never point it at aircraft. The laser turns itself off 60 seconds after the
 last command if the app goes away.

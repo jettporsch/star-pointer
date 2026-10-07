@@ -1,6 +1,7 @@
+import math
 from datetime import datetime, timezone
 
-from app.align import Alignment
+from app.align import Alignment, separation, vec
 from app.mount import Mount
 from app.skycoords import Observer, look_up
 
@@ -81,3 +82,24 @@ class Pointer:
             raise ValueError(f"{name} is below the horizon: {target}")
         self.goto(target.altitude_deg, target.azimuth_deg)
         return target
+
+    def miss(self, name, observer=WYLIE, when=None):
+        """Call after a GOTO, once the beam has been jogged onto `name`.
+
+        Compares the star's real position with where the alignment thinks the
+        beam is now. That difference is how far the GOTO landed from the star.
+        Uses the star's position right now, so time spent jogging doesn't count
+        against the result even though the sky keeps moving.
+        """
+        when = when or datetime.now(timezone.utc)
+        star = look_up(name, observer, when)
+        beam_alt, beam_az = self.where()
+        up = beam_alt - star.altitude_deg
+        right = ((beam_az - star.azimuth_deg + 180) % 360 - 180) * math.cos(
+            math.radians(star.altitude_deg))
+        total = separation(vec(beam_alt, beam_az),
+                           vec(star.altitude_deg, star.azimuth_deg))
+        # The beam is on the star now, so the alignment's error here is the
+        # GOTO's miss with the sign flipped: positive means it landed high/right.
+        return {"star": name, "alt": star.altitude_deg, "az": star.azimuth_deg,
+                "up": -up, "right": -right, "total": total}
