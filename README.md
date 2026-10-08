@@ -15,7 +15,7 @@ accuracy across the sky and a cleaner v2 mount.
 I've always been fascinated with space and astronomy, and I wanted a personal
 project that used something I'm passionate about while digging into hardware.
 This one covers embedded firmware, motion control, PCB design, mechanical
-design, and enough math that the software side isn't just just connecting 
+design, and enough math that the software side isn't just connecting 
 libraries together.
 
 ## Architecture
