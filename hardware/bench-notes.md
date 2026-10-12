@@ -282,3 +282,14 @@ Second attempt: aligned on Altair and Vega, sighting straight down the beam from
 Lessons: 12V on before starting the app so the laser can't swing, sight down the beam when centering, and face south at startup so the cable limit sits due north where few stars cross.
 
 Next: big round-trip az test indoors to confirm the pulley stays tight, then measure accuracy across more stars.
+
+## 2026-10-12: Breadboard rewire, before
+
+The v1 breadboard grew one jumper at a time over a month of bench testing: two DRV8825s, the laser switch, the endstops (since dropped), and bulk caps wired in off to the side. It works, but loose dupont jumpers already caused the intermittent STEP2 dropout, and it won't fit the v2 electronics floor.
+
+Rebuilding the same circuit on a half breadboard with solid 22AWG wire, cut to length, laid flat, and color coded by function. The 100µF caps move right onto each driver's VMOT pin, and the unused endstop wiring is left out.
+
+![v1 breadboard, top](../docs/images/v1-breadboard-top.jpg)
+![v1 breadboard, side](../docs/images/v1-breadboard-side.jpg)
+
+New layout: ![v2 wiring layout](../docs/images/v2-wiring-layout.png)
