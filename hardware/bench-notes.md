@@ -293,3 +293,17 @@ Rebuilding the same circuit on a half breadboard with solid 22AWG wire, cut to l
 ![v1 breadboard, side](../docs/images/v1-breadboard-side.jpg)
 
 New layout: ![v2 wiring layout](../docs/images/v2-wiring-layout.png)
+
+## 2026-10-09: v2 motor fork redesign
+
+The first v2 motor fork (part 04) cracked at the inside corners of its window while coming off the build plate. Printed upright, those corners had sharp 90 degree edges with layer lines running straight across the webs, so stress piled up exactly where PLA is weakest. Revised it four times: webs thickened to 10.5 mm, tapered outward to 18 mm at the base where bending is highest, R3.35 fillets on the window corners, and the motor upright flared smoothly into the crossbar instead of stepping into it.
+
+## 2026-10-12: Breadboard rewire, in progress
+
+Rebuilt the circuit on a half breadboard sitting on the printed v2 electronics floor, using solid 22AWG cut to length. Both drivers are in (placeholders for now, the tuned ones swap in last), with M0/M1 to GND, M2 and SLP to 3V3, RST jumpered to SLP, and the 100uF caps right at each VMOT pin. Laser transistor and 330 ohm resistor are in. STEP/DIR and laser signal run to the Nucleo as one bundle.
+
+On the left side, GND ended up on the red-line rail and 3V3 on the blue-line rail, so that side is labeled. Caught one ground wire sitting in the 12V rail before any power went on.
+
+![v2 breadboard in progress](../docs/images/v2-breadboard-progress.jpg)
+
+Next: continuity check, Nucleo power wires, meter the rails, then swap in the tuned drivers and test with the v2 build.
