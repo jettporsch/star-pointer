@@ -292,7 +292,6 @@ Rebuilding the same circuit on a half breadboard with solid 22AWG wire, cut to l
 ![v1 breadboard, top](../docs/images/v1-breadboard-top.jpg)
 ![v1 breadboard, side](../docs/images/v1-breadboard-side.jpg)
 
-New layout: ![v2 wiring layout](../docs/images/v2-wiring-layout.png)
 
 ## 2026-10-09: v2 motor fork redesign
 
