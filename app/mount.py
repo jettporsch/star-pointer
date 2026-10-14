@@ -1,10 +1,24 @@
+import glob
 import time
+
 import serial
+from serial.tools import list_ports
+
+ST_LINK_VID = 0x0483  # the Nucleo's onboard ST-Link
+
+
+def find_port():
+    """The Nucleo's serial port, wherever macOS put it this time."""
+    ports = sorted(p.device for p in list_ports.comports() if p.vid == ST_LINK_VID)
+    ports = ports or sorted(glob.glob("/dev/cu.usbmodem*"))
+    if not ports:
+        raise RuntimeError("Nucleo not found, is the USB cable plugged in?")
+    return ports[0]
 
 
 class Mount:
-    def __init__(self, port="/dev/cu.usbmodem103", baud=115200):
-        self.ser = serial.Serial(port, baud, timeout=1)
+    def __init__(self, port=None, baud=115200):
+        self.ser = serial.Serial(port or find_port(), baud, timeout=1)
         time.sleep(0.5)
         # a bare Enter clears any leftover junk in the firmware's line buffer
         self.ser.write(b"\r")

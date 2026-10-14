@@ -68,13 +68,17 @@ python3 test_skycoords.py   # validation suite
 
 Needs Flask and pyserial: `pip3 install flask pyserial`.
 
+Plug in the Nucleo's USB and the 12V supply, then double-click `start.command`.
+It finds the Nucleo's serial port, starts the web app, and opens it in the
+browser. The Terminal window also prints the address for a phone on the same
+wifi. Closing that window stops the app and switches the laser off.
+
+From a terminal instead:
+
 ```bash
 python3 -m app.align   # desk test: simulated tilted mount, no hardware needed
 python3 -m app.web     # web UI on http://localhost:8000
 ```
-
-The web app listens on the local network, so a phone on the same wifi can open
-it at the laptop's IP address on port 8000.
 
 ## Using it outside
 

@@ -1,5 +1,8 @@
 import csv
 import math
+import signal
+import socket
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -396,7 +399,27 @@ poll(); setInterval(poll, 500);
 </body></html>"""
 
 
+def lan_ip():
+    """This laptop's address on the local network, for opening the page on a phone."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("10.255.255.255", 1))  # UDP connect sends nothing
+        return s.getsockname()[0]
+    except OSError:
+        return None
+    finally:
+        s.close()
+
+
 if __name__ == "__main__":
+    # Closing the Terminal window sends SIGHUP. Turn it into a normal exit so
+    # the finally block below still switches the laser off.
+    signal.signal(signal.SIGHUP, lambda *_: sys.exit(0))
+    ip = lan_ip()
+    print("\nStar Pointer running at http://localhost:8000")
+    if ip:
+        print(f"On your phone (same wifi): http://{ip}:8000")
+    print("Close this window or press Ctrl-C to stop.\n")
     # 0.0.0.0 lets your phone connect on the same wifi.
     # Port 8000 because macOS uses 5000 for AirPlay.
     try:
