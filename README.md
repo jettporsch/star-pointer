@@ -141,6 +141,6 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
 - [x] Two-star alignment
 - [x] End-to-end GOTO
 - [ ] Accuracy measurement across the sky
-- [ ] v2 mount: smaller frame, cable routing, electronics enclosure
+- [x] v2 mount: smaller frame, cable routing, electronics enclosure
 - [ ] Sidereal tracking
 - [ ] Custom PCB
