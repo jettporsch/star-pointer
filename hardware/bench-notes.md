@@ -306,3 +306,18 @@ On the left side, GND ended up on the red-line rail and 3V3 on the blue-line rai
 ![v2 breadboard in progress](../docs/images/v2-breadboard-progress.jpg)
 
 Next: continuity check, Nucleo power wires, meter the rails, then swap in the tuned drivers and test with the v2 build.
+
+## 2026-10-14: v2 assembled and running
+
+Built the full v2 mount and moved the new breadboard onto the electronics floor. Laser run is stranded 22AWG, spliced to the laser leads at the capsule with strain relief, and routed through the cable service loop. The floor hangs on printed clamps instead of being glued, so the electronics stay accessible while the mount is still being tested.
+
+First power-up: the laser worked, but az buzzed back and forth and alt moved once and quit. Both motor plugs were sitting one row low on their drivers, covering B1 through FAULT instead of B2 through A2. Moving them up one row fixed both. The motor pins are always the middle four on the driver's motor side, two pins free on each end. Plug order from the VMOT end: red, green, black, blue (coil pairs red/green and black/blue).
+
+Alt now runs reversed because the motor sits mirrored in v2, so ALT_SIGN is -1 in `app/pointer.py`. Jog, GOTO and alignment all pick it up from there. Jogged both axes from the web app and directions are correct.
+
+![v2 mount, angle](../docs/images/v2-mount-angle.jpg)
+![v2 mount, front](../docs/images/v2-mount-front.jpg)
+![v2 mount, opened](../docs/images/v2-mount-open.jpg)
+![v2 breadboard](../docs/images/v2-breadboard-top.jpg)
+
+Next: accuracy run on a clear night, then the README before/after section.

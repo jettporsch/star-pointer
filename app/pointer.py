@@ -11,7 +11,7 @@ STEPS_PER_DEG = 200 * 16 * 4 / 360
 # Which motor drives which axis, and direction. Checked on the bench:
 # +alt moves the beam up, +az turns the stage CW from above.
 ALT_AXIS, AZ_AXIS = 1, 2
-ALT_SIGN, AZ_SIGN = 1, 1
+ALT_SIGN, AZ_SIGN = -1, 1
 
 ALT_MIN, ALT_MAX = 0.0, 90.0
 
