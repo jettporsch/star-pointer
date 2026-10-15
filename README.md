@@ -23,7 +23,7 @@ libraries together.
 
 <p align="center">
   <img src="docs/images/v2-mount-angle.jpg" height="460">
-  <img src="docs/images/v2-night-operating.jpg" height="460">
+  <img src="docs/images/v2-night-operator.jpg" height="460">
 </p>
 
 v1 proved out the firmware, the math and the first sky tests on an open
