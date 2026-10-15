@@ -6,9 +6,8 @@ two-star alignment done at setup.
 
 ![Star Pointer on a star](docs/images/v2-night-sky.jpg)
 
-**Status:** working v2 mount. After a two-star alignment it points the laser
-at any star picked from a phone or laptop. Measured accuracy on the sky is
-**0.33° RMS, 0.44° worst** across 8 stars, against a ±0.5° design target, 
+**Status:** working v2 mount. Measured accuracy on the sky is
+**0.33° RMS, 0.44° worst** across 8 stars, against a 0.5° design target, 
 about the width of the full moon.
 
 ## Why I built this
@@ -146,9 +145,9 @@ last command if the app goes away.
   horizon, by 1.1°. That pattern comes from a mount error the two-star model
   isn't aware of: either the laser sits about 0.9° off square in its capsule,
   or the altitude axis leans about 0.6° relative to the azimuth axis. Fitting
-  either one to the log cuts the side-to-side error from 0.50° to about 0.1°.
-  Next step is adding both terms to the pointing model and checking it on a
-  new night.
+  either one to the log cuts the side-to-side error from 0.50° to about 0.1
+  to 0.15°. Next step is adding both terms to the pointing model and checking
+  it on a new night.
 
 <p align="center">
   <img src="docs/images/v2-night-operator.jpg" height="460">
@@ -176,7 +175,7 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
 - [x] RA/Dec to alt/az transform, precession, refraction
 - [x] Validation suite
 - [x] STM32 stepper control, both axes
-- [x] Altitude homing
+- [x] Endstop homing (built and tested, then dropped since two-star alignment handles it)
 - [x] Prototype mount built
 - [x] Azimuth zero (manual index mark; switch homing kept as a test tool)
 - [x] Serial protocol spec
