@@ -9,8 +9,10 @@ Every command gets exactly one reply line. Errors start with `ERR`. The
 firmware never sends anything unprompted except `star pointer ready` at
 startup, so the host can always pair a reply with the command that caused it.
 
-Axis 1 is altitude, axis 2 is azimuth. Positive altitude raises the beam,
-positive azimuth turns the stage clockwise seen from above. One step is a 1/16
+Axis 1 is altitude, axis 2 is azimuth. Positive azimuth turns the stage
+clockwise seen from above. On v1, positive altitude raised the beam. The v2
+altitude motor is mounted mirrored, so positive steps lower it. The firmware
+doesn't care; `ALT_SIGN` in `app/pointer.py` handles direction. One step is a 1/16
 microstep: 200 x 16 x 4 / 360 = 35.56 steps per degree at the output.
 
 ## Commands
@@ -23,7 +25,7 @@ microstep: 200 x 16 x 4 / 360 = 35.56 steps per degree at the output.
 | `V <us>` | `OK` | Step period in microseconds, 100 to 20000, both axes. Power-on default is 600. The host sets 2000 because the loaded az stage can stall faster. |
 | `L 1` | `OK` | Laser on. It turns itself off 60 s later unless `L 1` is sent again. |
 | `L 0` | `OK` | Laser off. |
-| `E` | `ES ALT <0/1> AZ <0/1>` | Endstop states, 1 means pressed. Reads 0 with the switches unplugged. |
+| `E` | `ES ALT <0/1> AZ <0/1>` | Endstop states, 1 means pressed. Reads 0 with no switches fitted, which is the case on v2. |
 | `H` | `HOMED` | Altitude homing on its endstop. Optional, see decision D7. |
 | `H AZ` | `HOMED <n>` | Azimuth homing test routine. `n` is where the count thought the edge was before zeroing. Kept as a test tool. |
 

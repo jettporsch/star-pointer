@@ -74,6 +74,8 @@ serial: move, status, stop, and laser.
 | `firmware/` | STM32 firmware |
 | `hardware/` | BOM, dimensions, CAD files, bench notes |
 | `docs/` | Design decisions, error budget, serial protocol |
+| `data/` | Accuracy test log |
+| `start.command` | Double-click launcher for the web app |
 
 ## Running the coordinate engine
 
@@ -163,7 +165,7 @@ library. If a check fails, its name points at the specific thing that broke.
 Comparing to a reference implementation would only tell me the two disagree,
 not where or which one is wrong.
 
-14 checks, all passing.
+15 checks, all passing.
 
 ## References
 
@@ -177,7 +179,7 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
 - [x] STM32 stepper control, both axes
 - [x] Endstop homing (built and tested, then dropped since two-star alignment handles it)
 - [x] Prototype mount built
-- [x] Azimuth zero (manual index mark; switch homing kept as a test tool)
+- [x] Azimuth zero (stage faces south at startup; switch homing kept as a test tool)
 - [x] Serial protocol spec
 - [x] Laser wiring and interlock
 - [x] Laser auto-off timer

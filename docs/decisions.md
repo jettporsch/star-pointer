@@ -134,6 +134,11 @@ signal to step back and ask what homing was actually for.
 before the app). A slot that locks the turntable with a coin is on the v2 list
 to make the az mark more precise.
 
+**Update, v2:** the alignment solver now finds the laser's starting angle from
+any position, so "laser roughly flat" went away. The coin slot wasn't needed
+either. The only startup rule left is facing the stage roughly south, which
+puts the half-turn cable limit due north where few stars cross.
+
 ## Template
 
 ```
