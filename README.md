@@ -23,7 +23,7 @@ libraries together.
 
 <p align="center">
   <img src="docs/images/v2-mount-angle.jpg" height="460">
-  <img src="docs/images/v2-night-operator.jpg" height="460">
+  <img src="docs/images/v2-mount-open.jpg" height="460">
 </p>
 
 v1 proved out the firmware, the math and the first sky tests on an open
@@ -149,6 +149,11 @@ last command if the app goes away.
   axis leans about 0.6° relative to the azimuth axis. Fitting either one to the
   log cuts the side-to-side error from 0.50° to 0.10 to 0.15° RMS. Next step is
   adding both terms to the pointing model and checking it on a fresh night.
+
+<p align="center">
+  <img src="docs/images/v2-night-operator.jpg" height="460">
+</p>
+<p align="center"><em>Running the accuracy test, Oct 14, 2026</em></p>
 
 Details in `hardware/bench-notes.md`.
 
