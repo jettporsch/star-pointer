@@ -4,19 +4,42 @@ A two-axis motorized mount that points a laser at any star you pick on your
 laptop. It works out where to aim from your location, the current time, and a
 two-star alignment done at setup.
 
-**Status:** working prototype. After a two-star alignment it points the laser 
-at a selected star, controlled from a phone or laptop. Next up is measuring 
-accuracy across the sky and a cleaner v2 mount.
+![Star Pointer on a star](docs/images/v2-night-sky.jpg)
 
-**Design target:** ±0.5° pointing accuracy.
+**Status:** working v2 mount. After a two-star alignment it points the laser
+at any star picked from a phone or laptop. Measured accuracy on the sky is
+**0.33° RMS, 0.44° worst** across 8 stars, against a ±0.5° design target.
+Next up is adding two mount-error terms to the pointing model (see Results).
 
 ## Why I built this
 
 I've always been fascinated with space and astronomy, and I wanted a personal
 project that used something I'm passionate about while digging into hardware.
-This one covers embedded firmware, motion control, PCB design, mechanical
-design, and enough math that the software side isn't just connecting 
+This one covers embedded firmware, motion control, mechanical design, and
+enough math that the software side isn't just connecting 
 libraries together.
+
+## The build
+
+<p align="center">
+  <img src="docs/images/v2-mount-angle.jpg" width="48%">
+  <img src="docs/images/v2-night-operating.jpg" width="36%">
+</p>
+
+v1 proved out the firmware, the math and the first sky tests on an open
+prototype frame, with the electronics on a full breadboard of loose jumpers
+next to it. v2 is a redesigned mount: a printed fork on a 120 mm turntable,
+both belt drives at fixed center distances, a cable service loop that allows
+half a turn of azimuth each way, and the electronics inside the base on a
+floor that unclips for access.
+
+| v1 wiring | v2 wiring |
+|---|---|
+| ![v1 breadboard](docs/images/v1-breadboard-top.jpg) | ![v2 breadboard](docs/images/v2-breadboard-top.jpg) |
+
+The v2 board is the same circuit rebuilt on a half breadboard with solid wire
+cut to length. Print files, editable STEP files, the full assembly and the
+fastener list are in [`hardware/cad/v2`](hardware/cad/v2).
 
 ## Architecture
 
@@ -84,7 +107,8 @@ python3 -m app.web     # web UI on http://localhost:8000
 
 1. Stage facing roughly south. That puts the cable limit (half a turn either
    way) due north, where few stars cross. The laser can rest at any angle.
-2. 12V on first, so the motors lock the mount in place, then start the web app.
+2. 12V on first, so the motors lock the mount in place, then double-click
+   `start.command`.
 3. Jog the beam onto a bright star, sighting straight down the beam from behind
    the laser, pick it in the Align list, and tap "Beam is on this star."
 4. The Align list now ranks every other star as a partner for the first one.
@@ -113,7 +137,18 @@ last command if the app goes away.
   driveway sloped about 4°. Alignment reported the base 3° off level and the
   laser's starting angle within 0.1°, both matching the real setup. GOTO to
   Deneb and Polaris landed on the star with no manual correction.
-- **Not yet measured:** pointing error in degrees across the sky.
+- **Pointing accuracy (Oct 14, 2026, v2 mount):** aligned on Altair and Vega,
+  then sent GOTOs to 8 other stars between 52° and 78° altitude and measured
+  each miss: **0.33° RMS, 0.44° worst**, inside the 0.5° target. Raw log in
+  [`data/accuracy.csv`](data/accuracy.csv).
+- **What's left in the error:** the misses aren't random. Stars higher than
+  the alignment stars land to the right and lower ones to the left. A second
+  alignment (Vega and Scheat) missed Mizar and Alkaid, 11° above the horizon,
+  by 1.1°. That pattern comes from a mount error the two-star model can't see:
+  either the laser sits about 0.9° off square in its capsule, or the altitude
+  axis leans about 0.6° relative to the azimuth axis. Fitting either one to the
+  log cuts the side-to-side error from 0.50° to 0.10 to 0.15° RMS. Next step is
+  adding both terms to the pointing model and checking it on a fresh night.
 
 Details in `hardware/bench-notes.md`.
 
@@ -144,7 +179,8 @@ Sidereal time, Julian date, and precession formulas follow Meeus,
 - [x] Laser auto-off timer
 - [x] Two-star alignment
 - [x] End-to-end GOTO
-- [ ] Accuracy measurement across the sky
+- [x] Accuracy measurement across the sky
 - [x] v2 mount: smaller frame, cable routing, electronics enclosure
+- [ ] Pointing model terms for laser cone and axis tilt
 - [ ] Sidereal tracking
 - [ ] Custom PCB

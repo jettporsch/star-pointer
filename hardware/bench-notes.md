@@ -321,3 +321,19 @@ Alt now runs reversed because the motor sits mirrored in v2, so ALT_SIGN is -1 i
 ![v2 breadboard](../docs/images/v2-breadboard-top.jpg)
 
 Next: accuracy run on a clear night, then the README before/after section.
+
+## 2026-10-14: Accuracy run, v2
+
+Partly cloudy night in the driveway. Started with the new `start.command` launcher, stage facing south.
+
+Aligned on Altair and Vega (base 0.94 deg off level), then sent GOTOs to 8 other stars between 52 and 78 deg altitude and tapped Centered on each: **0.33 deg RMS, 0.44 deg worst**, inside the 0.5 deg target. Every result is in `data/accuracy.csv`.
+
+Then realigned on Vega and Scheat. Altair landed within 0.24 deg, but Mizar and Alkaid, both about 11 deg above the horizon, missed by 1.1 deg to the left. My first guess was az slipping like v1's first night, but the log doesn't fit that: those were short slews, and the first run held steady for over ten minutes without the misses growing.
+
+The log does fit a geometry error. Side-to-side misses grow with altitude away from the alignment stars, right above them and left below. A laser cone error of 0.88 deg, or an alt axis tilted 0.64 deg against the az axis, explains both runs and cuts the side-to-side RMS from 0.50 to 0.10-0.15 deg. Neither term is in the two-star model. The collar gap being uneven turned out to be a fixed offset toward the belt side, not wobble: the narrow spot stays put when the stage turns.
+
+![beam on the sky](../docs/images/v2-night-sky.jpg)
+![setup](../docs/images/v2-night-setup.jpg)
+![close up](../docs/images/v2-night-closeup.jpg)
+
+Next: add cone and axis tilt terms to the pointing model, log raw motor angles with each Centered result, calibrate on a night with low and high stars, then verify on a fresh alignment.

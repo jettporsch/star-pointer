@@ -37,13 +37,41 @@ runs on: go after the biggest term, ignore anything under about 0.05°.
 | 1 | Microstep positional error | 0.07° | tbd | ±0.2 full step at motor, divided by 4 at the belt |
 | 2 | Belt backlash and compliance | 0.15° | <0.01° | Wall test at 2.9 m, repeated moves with reversals |
 | 3 | Frame and printed-part flex | 0.15° | tbd | Estimate, worst at high altitude |
-| 4 | Two-star alignment residual | 0.25° | tbd | First sky test: GOTO landed on Deneb and Polaris by eye, not yet measured in degrees |
-| 5 | Laser collimation offset | 0.15° | tbd | Estimate, beam axis vs altitude axis |
+| 4 | Two-star alignment residual | 0.25° | see below | Measured as part of the total, not separately |
+| 5 | Laser collimation offset | 0.15° | ~0.9° | Fitted from the Oct 14 accuracy log, see below. Could also be altitude axis tilt |
 | 6 | Homing repeatability | 0.05° | n/a | Switch homing dropped (decision D7); alignment absorbs the start position |
 | 7 | Coordinate math residual | 0.02° | 0.01° | Measured by the test suite |
 | 8 | Clock error | 0.01° | n/a | Sky moves 0.25°/min, so 1 s of clock error is 0.004° |
 | 9 | Observer position error | <0.01° | n/a | 0.001° of latitude is about 100 m |
 | | **RSS total** | **0.39°** | | |
+
+## Measured result
+
+Oct 14, 2026, v2 mount, aligned on Altair and Vega: **0.33° RMS, 0.44° worst**
+over 8 stars between 52° and 78° altitude. Inside the target, with less
+headroom than the estimate.
+
+The misses have a pattern. Side-to-side error grows with altitude away from
+the alignment stars: stars above them land right, stars below land left, and a
+second alignment missed two stars 11° above the horizon by 1.1°. Random terms
+like microstepping and flex can't do that. Two mount errors can, and the
+two-star model includes neither:
+
+- **Collimation (cone) error:** the laser not exactly square to the altitude
+  axis. Best fit 0.88°.
+- **Axis non-perpendicularity:** the altitude axis not exactly square to the
+  azimuth axis. Best fit 0.64°.
+
+Either one alone cuts the side-to-side RMS from 0.50° to 0.10 to 0.15°. With
+11 stars the two can't be told apart, because both grow with altitude. Stars
+near the horizon and near overhead separate them. Collimation was budgeted at
+0.15°, so it was underestimated by about 6x, and it is now the dominant term.
+Following the rule below, it gets fixed next: both terms go into the pointing
+model, get fitted once from a calibration night, and get checked on a fresh
+alignment.
+
+The second alignment's 1.1° misses were at 11° altitude, below the 20° floor
+this budget covers, and are left out of the headline number.
 
 ## Errors already eliminated
 
