@@ -31,8 +31,9 @@ fixed center distances so nothing needs tensioning, a cable loop that lets
 it turn half a turn each way, and all the electronics inside the base on a 
 floor that unclips.
 
-| v1 wiring | v2 wiring |
+| v1 | v2 |
 |---|---|
+| ![v1 mount](docs/images/v1-mount-front.jpg) | ![v2 mount](docs/images/v2-mount-front.jpg) |
 | ![v1 breadboard](docs/images/v1-breadboard-top.jpg) | ![v2 breadboard](docs/images/v2-breadboard-top.jpg) |
 
 The v2 board is the same circuit rebuilt on a half breadboard with solid wire
