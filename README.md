@@ -1,23 +1,22 @@
 # Star Pointer
 
 A two-axis motorized mount that points a laser at any star you pick on your
-laptop. It works out where to aim from your location, the current time, and a
+laptop or phone. It works out where to aim from your location, the current time, and a
 two-star alignment done at setup.
 
 ![Star Pointer on a star](docs/images/v2-night-sky.jpg)
 
 **Status:** working v2 mount. After a two-star alignment it points the laser
 at any star picked from a phone or laptop. Measured accuracy on the sky is
-**0.33° RMS, 0.44° worst** across 8 stars, against a ±0.5° design target.
-Next up is adding two mount-error terms to the pointing model (see Results).
+**0.33° RMS, 0.44° worst** across 8 stars, against a ±0.5° design target, 
+about the width of the full moon.
 
 ## Why I built this
 
-I've always been fascinated with space and astronomy, and I wanted a personal
-project that used something I'm passionate about while digging into hardware.
-This one covers embedded firmware, motion control, mechanical design, and
-enough math that the software side isn't just connecting 
-libraries together.
+I’ve always loved space and astronomy, and I wanted a hardware project built 
+around that. This one ended up covering a little of everything: STM32 firmware,
+stepper motion control, a 3D printed mount I went through two versions of, and 
+the coordinate math to turn a star name into motor steps.
 
 ## The build
 
@@ -26,12 +25,12 @@ libraries together.
   <img src="docs/images/v2-mount-open.jpg" height="460">
 </p>
 
-v1 proved out the firmware, the math and the first sky tests on an open
-prototype frame, with the electronics on a full breadboard of loose jumpers
-next to it. v2 is a redesigned mount: a printed fork on a 120 mm turntable,
-both belt drives at fixed center distances, a cable service loop that allows
-half a turn of azimuth each way, and the electronics inside the base on a
-floor that unclips for access.
+v1 was an open frame with a full breadboard of jumpers sitting next to it. 
+It got the firmware, the math and the first sky tests working. v2 is the 
+cleaned-up version: a printed fork on a 120 mm turntable, both belts at 
+fixed center distances so nothing needs tensioning, a cable loop that lets 
+it turn half a turn each way, and all the electronics inside the base on a 
+floor that unclips.
 
 | v1 wiring | v2 wiring |
 |---|---|
@@ -51,7 +50,7 @@ instant stop. The astronomy has to be on the laptop, because that's
 where the catalog and the UI live.
 
 Step conversion lives in Python for now. Two-star alignment needs the same 
-math anyway, and prototyping it in Python was faster to debug. The firmware 
+math, and prototyping it in Python was faster to debug. The firmware 
 stays simple: it takes step moves, reports position, and handles the laser 
 and stop. Porting the conversion to the STM32 is a possible later step.
 
@@ -115,10 +114,10 @@ python3 -m app.web     # web UI on http://localhost:8000
    Pick one rated "good" and do the same.
 5. Tap any star in the list to point at it.
 
-Choosing the second star matters more than it looks. With the same 0.1°
+Choosing the second star matters more than it may seem. With the same 0.1°
 centering slip, a good pair keeps every GOTO within about 0.1°, while a poor
 one can throw some off by several degrees. The app simulates each pair and
-rates it, so there's nothing to memorize.
+rates it.
 
 **Measuring accuracy:** after a GOTO, jog the beam onto the star and tap
 "Centered." The app logs how far the GOTO landed from the star, and in which
@@ -141,14 +140,15 @@ last command if the app goes away.
   then sent GOTOs to 8 other stars between 52° and 78° altitude and measured
   each miss: **0.33° RMS, 0.44° worst**, inside the 0.5° target. Raw log in
   [`data/accuracy.csv`](data/accuracy.csv).
-- **What's left in the error:** the misses aren't random. Stars higher than
-  the alignment stars land to the right and lower ones to the left. A second
-  alignment (Vega and Scheat) missed Mizar and Alkaid, 11° above the horizon,
-  by 1.1°. That pattern comes from a mount error the two-star model can't see:
-  either the laser sits about 0.9° off square in its capsule, or the altitude
-  axis leans about 0.6° relative to the azimuth axis. Fitting either one to the
-  log cuts the side-to-side error from 0.50° to 0.10 to 0.15° RMS. Next step is
-  adding both terms to the pointing model and checking it on a fresh night.
+- **What's left in the error:** the misses definitely follow a pattern. Stars
+  higher than the alignment stars land to the right and lower ones to the left.
+  A second alignment (Vega and Scheat) missed Mizar and Alkaid, 11° above the
+  horizon, by 1.1°. That pattern comes from a mount error the two-star model
+  isn't aware of: either the laser sits about 0.9° off square in its capsule,
+  or the altitude axis leans about 0.6° relative to the azimuth axis. Fitting
+  either one to the log cuts the side-to-side error from 0.50° to about 0.1°.
+  Next step is adding both terms to the pointing model and checking it on a
+  new night.
 
 <p align="center">
   <img src="docs/images/v2-night-operator.jpg" height="460">
